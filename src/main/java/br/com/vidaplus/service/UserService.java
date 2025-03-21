@@ -2,6 +2,7 @@ package br.com.vidaplus.service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,7 +52,7 @@ public class UserService {
         for (Profile profile : profiles) {
             AllRole role = allRoleRepository.findByName(profile).orElse(null); // orElse -> Optional do AllRoleRepository
             if (role == null) {
-                throw new RuntimeException("Role not found: " + profile);
+                throw new RuntimeException("Papel não encontrado: " + profile);
             }
             roles.add(role);
         }
@@ -63,7 +64,23 @@ public class UserService {
         return userRepository.save(user);
     }
     @Transactional
-    public User updateUser(User user) {
+    public User updateUser(User user, Set<Profile> profiles) {
+        Set<AllRole> roles = new HashSet<>();
+
+        if (profiles != null) {
+            for (Profile profile : profiles) {
+                Optional<AllRole> roleOptional = allRoleRepository.findByName(profile);
+                
+                try {
+                    AllRole role = roleOptional.get();
+                    roles.add(role);
+                } catch (NoSuchElementException e) {
+                    throw new RuntimeException("Papel não encontrado: " + profile);
+                }
+            }
+            user.setRoles(roles);
+        }
+
         return userRepository.save(user);
     }
     

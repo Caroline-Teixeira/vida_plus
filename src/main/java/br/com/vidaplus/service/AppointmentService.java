@@ -45,7 +45,7 @@ public class AppointmentService {
             return appointmentRepository.findByPatient(patient);
         }
         else{
-            throw new RuntimeException("Patient not found with id: " + patientId);
+            throw new RuntimeException("Paciente não encontrado: " + patientId);
         }
     }
 
@@ -54,7 +54,7 @@ public class AppointmentService {
         if (healthProfessional != null) {
             return appointmentRepository.findByHealthProfessional(healthProfessional);
         } else {
-            throw new RuntimeException("Health professional not found with id: " + healthProfessionalId);
+            throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
         }
     }
 
@@ -65,13 +65,13 @@ public class AppointmentService {
         // Busca o paciente
         User patient = userRepository.findById(patientId).orElse(null);
         if (patient == null) {
-            throw new RuntimeException("Patient not found with id: " + patientId);
+            throw new RuntimeException("Paciente não encontrado: " + patientId);
         }
 
         // Busca o profissional de saúde
         User healthProfessional = userRepository.findById(healthProfessionalId).orElse(null);
         if (healthProfessional == null) {
-            throw new RuntimeException("Health professional not found with id: " + healthProfessionalId);
+            throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
         }
 
         // Verifica se o usuário tem o papel de profissional de saúde
@@ -84,7 +84,7 @@ public class AppointmentService {
         }
 
         if (!isHealthProfessional) {
-            throw new RuntimeException("User is not a health professional");
+            throw new RuntimeException("Usuário não é Profissional da Saúde.");
         }
 
         // Criação e salvamento do Appointment
@@ -96,6 +96,7 @@ public class AppointmentService {
         appointment.setStatus(AppointmentStatus.SCHEDULED);
         appointment.setReason(reason);
         
+        
         return appointmentRepository.save(appointment);
     }
 
@@ -103,7 +104,7 @@ public class AppointmentService {
     public Appointment updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
         if (appointment == null) {
-            throw new RuntimeException("Appointment not found with id: " + appointmentId);
+            throw new RuntimeException("Consulta não encontrada: " + appointmentId);
         }
 
         appointment.setStatus(status);
@@ -118,7 +119,7 @@ public class AppointmentService {
     public void cancelAppointment(Long appointmentId) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElse(null);
         if (appointment == null) {
-            throw new RuntimeException("Appointment not found with id: " + appointmentId);
+            throw new RuntimeException("Consulta não encontrada: " + appointmentId);
         }
 
         appointment.setStatus(AppointmentStatus.CANCELLED);

@@ -51,7 +51,7 @@ public class User {
     private String email;
 
     @Column (name="password")
-    private String passwordHash;
+    private String password;
 
     @ManyToMany
     @JoinTable(

@@ -3,6 +3,7 @@ package br.com.vidaplus.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -44,11 +45,11 @@ public class UserController {
     public User registerUser(@RequestBody UserDto userDto) {
     // Verifica se o email e cpf existe
     if (userService.existsByEmail(userDto.getEmail())) {
-        throw new RuntimeException("Email already in use: " + userDto.getEmail());
+        throw new RuntimeException("E-mail existente: " + userDto.getEmail());
     }
     
     if (userService.existsByCpf(userDto.getCpf())) {
-        throw new RuntimeException("CPF already in use: " + userDto.getCpf());
+        throw new RuntimeException("CPF existente: " + userDto.getCpf());
     }
 
     // Converte UserDto para User e registra (exemplo implícito)
@@ -60,7 +61,7 @@ public class UserController {
     user.setGender(userDto.getGender());
     user.setContact(userDto.getContact());
     user.setEmail(userDto.getEmail());
-    user.setPasswordHash(userDto.getPassword());
+    user.setPassword(userDto.getPassword());
 
 
     return userService.registerUser(user, userDto.getRoles());
@@ -72,8 +73,9 @@ public class UserController {
         User user = userService.getUserById(id).orElse(null);
         
         if (user == null) {
-            throw new RuntimeException("User not found: " + id);
+            throw new RuntimeException("Usuário não encontrado: " + id);
         }
+        System.out.println("Senha recebida: " + userDto.getPassword()); // Debug
         
         user.setName(userDto.getName());
         user.setDateOfBirth(userDto.getDateOfBirth());
@@ -81,23 +83,27 @@ public class UserController {
         user.setContact(userDto.getContact());
         if (!user.getEmail().equals(userDto.getEmail()) && 
             userService.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("Email already in use: " + userDto.getEmail());
+            throw new RuntimeException("E-mail existente " + userDto.getEmail());
         }
         user.setEmail(userDto.getEmail());
+        user.setPassword(userDto.getPassword());
         
-        return userService.updateUser(user);
+        
+        // Atualiza o usuário e os papéis
+        return userService.updateUser(user, userDto.getRoles());
     }
 
     //DELETE por id
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         User user = userService.getUserById(id).orElse(null);
     
         if (user == null) {
-            throw new RuntimeException("User not found with id: " + id);
+            throw new RuntimeException("Usuário não encontrado: " + id);
         }
     
         userService.deleteUser(id);
+        return ResponseEntity.ok("Usuário deletado com sucesso");
     }
 
 }
