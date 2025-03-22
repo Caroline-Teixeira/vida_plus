@@ -42,7 +42,7 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    // 
+    // Cadastra Usuário
     @Transactional
     public User registerUser(User user, Set<Profile> profiles){
         // Cria um conjunto para os papéis
@@ -63,6 +63,8 @@ public class UserService {
         // Salva e retorna o usuário
         return userRepository.save(user);
     }
+
+    // Atualiza usuário
     @Transactional
     public User updateUser(User user, Set<Profile> profiles) {
         Set<AllRole> roles = new HashSet<>();
@@ -84,6 +86,7 @@ public class UserService {
         return userRepository.save(user);
     }
     
+    // Deleta usuário
     @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);

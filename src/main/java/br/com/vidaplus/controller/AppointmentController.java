@@ -3,6 +3,7 @@ package br.com.vidaplus.controller;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +24,13 @@ import br.com.vidaplus.service.AppointmentService;
 @RequestMapping("api/appointments")
 public class AppointmentController {
 
-    private AppointmentService appointmentService;
+    private final AppointmentService appointmentService;
+
+    @Autowired
+    public AppointmentController (AppointmentService appointmentService){
+        this.appointmentService = appointmentService;
+
+    }
 
 // GET lista de consultas
 @GetMapping
@@ -57,34 +64,43 @@ public class AppointmentController {
 
 // GET consulta por paciente
 @GetMapping("/patient/{patientId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
-        try {
-            List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
-            if (appointments != null) {
-                return ResponseEntity.ok(appointments);
-            } else {
-                throw new RuntimeException("Nenhuma consulta encontrado para o paciente com id: " + patientId);
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
-        }
+public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
+    try {
+        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
+        return ResponseEntity.ok(appointments);
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
     }
+}
     
     // GET consulta por profissional
-    @GetMapping("/healthProfessional/{healthProfessionalId}")
-    public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(
-            @PathVariable Long healthProfessionalId) {
-        try {
-            List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
-            if (appointments != null) {
-                return ResponseEntity.ok(appointments);
-            } else {
-                throw new RuntimeException("Nenhuma consulta encontrada para o profissional com id: " + healthProfessionalId);
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
-        }
+@GetMapping("/healthProfessional/{healthProfessionalId}")
+public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
+    try {
+        List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
+        return ResponseEntity.ok(appointments);
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
     }
+}
+
+     // GET Agenda do profissional. (TO DO na camada service)
+     @GetMapping("/available/{healthProfessionalId}")
+     public ResponseEntity<List<Appointment>> getAvailableSlots(
+             @PathVariable Long healthProfessionalId,
+             @RequestParam(required = false) String date) {
+         try {
+             List<Appointment> availableSlots = appointmentService.getAvailableSlots(healthProfessionalId, date);
+             if (availableSlots != null) {
+                 return ResponseEntity.ok(availableSlots);
+             } else {
+                 throw new RuntimeException("Nenhum horário disponível encontrado para o profissional com id: " + healthProfessionalId);
+             }
+         } catch (RuntimeException e) {
+             throw new RuntimeException("Erro ao buscar horários disponíveis para o profissional com id " + healthProfessionalId + ": " + e.getMessage());
+         }
+     }
+ 
     
     // POST agendarconsulta
     @PostMapping
@@ -95,18 +111,8 @@ public class AppointmentController {
                 appointmentDto.getHealthProfessionalId(),
                 appointmentDto.getDateTime(),
                 appointmentDto.getType(),
-                //appointmentDto.setStatus(appointmentDto.getStatus(AppointmentStatus.SCHEDULED)),
-                appointmentDto.getReason()
-                
-
-                /*private Long id;
-    private Long patientId;
-    private Long healthProfessionalId;
-    private LocalDateTime dateTime;
-    private AppointmentType type;
-    private AppointmentStatus status;
-    private String reason;
-    private String observations; */
+                appointmentDto.getReason(),
+                appointmentDto.getObservations()
 
             );
             if (appointment != null) {
@@ -146,7 +152,8 @@ public class AppointmentController {
                 appointmentDto.getHealthProfessionalId(),
                 appointmentDto.getDateTime(),
                 appointmentDto.getType(),
-                appointmentDto.getReason()
+                appointmentDto.getReason(),
+                appointmentDto.getObservations()
             );
             if (appointment != null) {
                 return ResponseEntity.ok(appointment);
@@ -160,30 +167,14 @@ public class AppointmentController {
     
     // DELETE pra cancelar consultas
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> cancelAppointment(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAppointment(@PathVariable Long id) {
         try {
-            appointmentService.cancelAppointment(id);
-            return ResponseEntity.ok("Consulta cancelada com sucesso");
+            appointmentService.deleteAppointment(id);
+            return ResponseEntity.ok("Consulta deletada com sucesso");
         } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao cancelar consulta com id " + id + ": " + e.getMessage());
+            throw new RuntimeException("Erro ao deletar consulta com id " + id + ": " + e.getMessage());
         }
     }
     
-    // GET Agenda do profissional. TO DO na camada service
-    @GetMapping("/available/{healthProfessionalId}")
-    public ResponseEntity<List<Appointment>> getAvailableSlots(
-            @PathVariable Long healthProfessionalId,
-            @RequestParam(required = false) String date) {
-        try {
-            List<Appointment> availableSlots = appointmentService.getAvailableSlots(healthProfessionalId, date);
-            if (availableSlots != null) {
-                return ResponseEntity.ok(availableSlots);
-            } else {
-                throw new RuntimeException("Nenhum horário disponível encontrado para o profissional com id: " + healthProfessionalId);
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar horários disponíveis para o profissional com id " + healthProfessionalId + ": " + e.getMessage());
-        }
-    }
-
+   
 }
