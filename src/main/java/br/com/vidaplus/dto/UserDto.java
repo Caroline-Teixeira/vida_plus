@@ -1,10 +1,12 @@
 package br.com.vidaplus.dto;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
+import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.Gender;
-import br.com.vidaplus.model.Profile;
+
 
 public class UserDto {
     private Long id;
@@ -15,7 +17,28 @@ public class UserDto {
     private String contact;
     private String email;
     private String password;
-    private Set<Profile> roles;
+    private Set<AllRole> roles = new HashSet<>();
+
+    
+    // Construtores
+
+    public UserDto() {
+
+    }
+
+
+    public UserDto(Long id, String name, String cpf, LocalDate dateOfBirth, Gender gender, String contact, String email,
+            String password, Set<AllRole> roles) {
+        this.id = id;
+        this.name = name;
+        this.cpf = cpf;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.contact = contact;
+        this.email = email;
+        this.password = password;
+        this.roles = roles;
+    }
 
 
     // Getters e Setters
@@ -67,12 +90,15 @@ public class UserDto {
     public void setPassword(String password) {
         this.password = password;
     }
-    public Set<Profile> getRoles() {
+
+    public Set<AllRole> getRoles() {
         return roles;
     }
-    public void setRoles(Set<Profile> roles) {
+
+    public void setRoles(Set<AllRole> roles) {
         this.roles = roles;
     }
+   
 
     
     

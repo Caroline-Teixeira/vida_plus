@@ -42,6 +42,8 @@ public class Appointment {
     
     private String reason;
     
-    private String observations;
+    @ManyToOne
+    @JoinColumn(name = "medical_record_id")
+    private MedicalRecord medicalRecord;
 
 }

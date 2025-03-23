@@ -7,6 +7,7 @@ import br.com.vidaplus.model.AppointmentType;
 
 public class AppointmentDto {
 
+    // Atributos
     private Long id;
     private Long patientId;
     private Long healthProfessionalId;
@@ -14,10 +15,26 @@ public class AppointmentDto {
     private AppointmentType type;
     private AppointmentStatus status;
     private String reason;
-    private String observations;
+    private MedicalRecordDto medicalRecord;
+
+    // Construtores
+    public AppointmentDto() {
+    }
+
+
+    public AppointmentDto(Long id, Long patientId, Long healthProfessionalId, LocalDateTime dateTime,
+            AppointmentType type, AppointmentStatus status, String reason, MedicalRecordDto medicalRecord) {
+        this.id = id;
+        this.patientId = patientId;
+        this.healthProfessionalId = healthProfessionalId;
+        this.dateTime = dateTime;
+        this.type = type;
+        this.status = status;
+        this.reason = reason;
+        this.medicalRecord = medicalRecord;
+    }
 
     // Getters e Setters
-
     public Long getId() {
         return id;
     }
@@ -60,11 +77,16 @@ public class AppointmentDto {
     public void setReason(String reason) {
         this.reason = reason;
     }
-    public String getObservations() {
-        return observations;
+
+
+    public MedicalRecordDto getMedicalRecord() {
+        return medicalRecord;
     }
-    public void setObservations(String observations) {
-        this.observations = observations;
+
+
+    public void setMedicalRecord(MedicalRecordDto medicalRecord) {
+        this.medicalRecord = medicalRecord;
     }
+    
 
 }

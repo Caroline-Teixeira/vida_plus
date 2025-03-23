@@ -30,19 +30,19 @@ public class UserController {
 
     // GET por Lista - todos os usuários
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserDto> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET por id
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
+    public UserDto getUserById(@PathVariable Long id) {
         return userService.getUserById(id).orElse(null);
     }
 
     //Post para registrar usuário
     @PostMapping
-    public User registerUser(@RequestBody UserDto userDto) {
+    public UserDto registerUser(@RequestBody UserDto userDto) {
     // Verifica se o email e cpf existe
     if (userService.existsByEmail(userDto.getEmail())) {
         throw new RuntimeException("E-mail existente: " + userDto.getEmail());
@@ -53,7 +53,7 @@ public class UserController {
     }
 
     // Converte UserDto para User e registra (exemplo implícito)
-    User user = new User(); // Você precisará preencher isso com os dados do userDto
+    User user = new User(); 
     user.setName(userDto.getName());
     user.setEmail(userDto.getEmail());
     user.setCpf(userDto.getCpf());
@@ -63,14 +63,14 @@ public class UserController {
     user.setEmail(userDto.getEmail());
     user.setPassword(userDto.getPassword());
 
-
     return userService.registerUser(user, userDto.getRoles());
+    
     }
 
     // Put pra atualizar um usuário
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        User user = userService.getUserById(id).orElse(null);
+        UserDto user = userService.getUserById(id).orElse(null);
         
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);
@@ -96,7 +96,7 @@ public class UserController {
     //DELETE por id
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        User user = userService.getUserById(id).orElse(null);
+        UserDto user = userService.getUserById(id).orElse(null);
     
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);

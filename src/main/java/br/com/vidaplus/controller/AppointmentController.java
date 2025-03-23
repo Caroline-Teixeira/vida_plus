@@ -32,8 +32,8 @@ public class AppointmentController {
 
     }
 
-// GET lista de consultas
-@GetMapping
+    // GET lista de consultas
+    @GetMapping
     public ResponseEntity<List<Appointment>> getAllAppointments() {
         try {
             List<Appointment> appointments = appointmentService.getAllAppointments();
@@ -47,8 +47,8 @@ public class AppointmentController {
         }
     }
 
-// GET lista de uma consulta
-@GetMapping("/{id}")
+    // GET lista de uma consulta
+    @GetMapping("/{id}")
     public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long id) {
         try {
             Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
@@ -62,44 +62,48 @@ public class AppointmentController {
         }
     }
 
-// GET consulta por paciente
-@GetMapping("/patient/{patientId}")
-public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
-    try {
-        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
-        return ResponseEntity.ok(appointments);
-    } catch (RuntimeException e) {
-        throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
+    // GET consulta por paciente
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
+            return ResponseEntity.ok(appointments);
+        }   
+        catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
+        }
     }
-}
     
     // GET consulta por profissional
-@GetMapping("/healthProfessional/{healthProfessionalId}")
-public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
-    try {
-        List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
-        return ResponseEntity.ok(appointments);
-    } catch (RuntimeException e) {
-        throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
+    @GetMapping("/healthProfessional/{healthProfessionalId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
+            return ResponseEntity.ok(appointments);
+        }   
+        catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
+        }
     }
-}
 
-     // GET Agenda do profissional. (TO DO na camada service)
-     @GetMapping("/available/{healthProfessionalId}")
-     public ResponseEntity<List<Appointment>> getAvailableSlots(
-             @PathVariable Long healthProfessionalId,
-             @RequestParam(required = false) String date) {
-         try {
-             List<Appointment> availableSlots = appointmentService.getAvailableSlots(healthProfessionalId, date);
-             if (availableSlots != null) {
-                 return ResponseEntity.ok(availableSlots);
-             } else {
-                 throw new RuntimeException("Nenhum horário disponível encontrado para o profissional com id: " + healthProfessionalId);
-             }
-         } catch (RuntimeException e) {
-             throw new RuntimeException("Erro ao buscar horários disponíveis para o profissional com id " + healthProfessionalId + ": " + e.getMessage());
-         }
-     }
+    // GET Agenda do profissional. (TO DO na camada service)
+    @GetMapping("/available/{healthProfessionalId}")
+    public ResponseEntity<List<Appointment>> getAvailableSlots(
+                @PathVariable Long healthProfessionalId,
+                @RequestParam(required = false) String date) {
+        try {
+            List<Appointment> availableSlots = appointmentService.getAvailableSlots(healthProfessionalId, date);
+            if (availableSlots != null) {
+                return ResponseEntity.ok(availableSlots);
+            } 
+            else {
+                throw new RuntimeException("Nenhum horário disponível encontrado para o profissional com id: " + healthProfessionalId);
+            }
+        } 
+        catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar horários disponíveis para o profissional com id " + healthProfessionalId + ": " + e.getMessage());
+        }
+    }
  
     
     // POST agendarconsulta
