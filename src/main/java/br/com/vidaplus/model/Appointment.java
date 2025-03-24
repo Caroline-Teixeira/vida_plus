@@ -43,7 +43,7 @@ public class Appointment {
     private String reason;
     
     @ManyToOne
-    @JoinColumn(name = "medical_record_id")
+    @JoinColumn(name = "medical_record_id", nullable = false)
     private MedicalRecord medicalRecord;
 
 }

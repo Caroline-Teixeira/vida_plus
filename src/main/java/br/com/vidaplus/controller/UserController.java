@@ -30,19 +30,19 @@ public class UserController {
 
     // GET por Lista - todos os usuários
     @GetMapping
-    public List<UserDto> getAllUsers() {
+    public List<User> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET por id
     @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable Long id) {
+    public User getUserById(@PathVariable Long id) {
         return userService.getUserById(id).orElse(null);
     }
 
     //Post para registrar usuário
     @PostMapping
-    public UserDto registerUser(@RequestBody UserDto userDto) {
+    public User registerUser(@RequestBody UserDto userDto) {
     // Verifica se o email e cpf existe
     if (userService.existsByEmail(userDto.getEmail())) {
         throw new RuntimeException("E-mail existente: " + userDto.getEmail());
@@ -52,25 +52,29 @@ public class UserController {
         throw new RuntimeException("CPF existente: " + userDto.getCpf());
     }
 
+    // Valida se o campo roles foi fornecido
+    if (userDto.getRoles() == null || userDto.getRoles().isEmpty()) {
+        throw new RuntimeException("O campo 'roles' é obrigatório");
+    }
+
     // Converte UserDto para User e registra (exemplo implícito)
-    User user = new User(); 
+    User user = new User(); // Você precisará preencher isso com os dados do userDto
     user.setName(userDto.getName());
     user.setEmail(userDto.getEmail());
     user.setCpf(userDto.getCpf());
     user.setDateOfBirth(userDto.getDateOfBirth());
     user.setGender(userDto.getGender());
     user.setContact(userDto.getContact());
-    user.setEmail(userDto.getEmail());
     user.setPassword(userDto.getPassword());
 
+
     return userService.registerUser(user, userDto.getRoles());
-    
     }
 
     // Put pra atualizar um usuário
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        UserDto user = userService.getUserById(id).orElse(null);
+        User user = userService.getUserById(id).orElse(null);
         
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);
@@ -88,6 +92,10 @@ public class UserController {
         user.setEmail(userDto.getEmail());
         user.setPassword(userDto.getPassword());
         
+        // Valida se o campo roles foi fornecido
+        if (userDto.getRoles() == null || userDto.getRoles().isEmpty()) {
+            throw new RuntimeException("O campo 'roles' é obrigatório");
+        }
         
         // Atualiza o usuário e os papéis
         return userService.updateUser(user, userDto.getRoles());
@@ -96,7 +104,7 @@ public class UserController {
     //DELETE por id
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(@PathVariable Long id) {
-        UserDto user = userService.getUserById(id).orElse(null);
+        User user = userService.getUserById(id).orElse(null);
     
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);

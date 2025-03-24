@@ -1,29 +1,41 @@
 package br.com.vidaplus.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import br.com.vidaplus.model.User;
+
 public class MedicalRecordDto {
-    
 
     private Long id;
+    private User patient;
+    private List<Long> appointmentIds;
     private String observations;
-
-    // Construtores
-    public MedicalRecordDto() {
-        
-    }
-
-    public MedicalRecordDto(Long id, String observations) {
-        this.id = id;
-        this.observations = observations;
-    }
+    private LocalDateTime recordDate;
 
     // Getters e Setters
     public Long getId() {
         return id;
     }
 
-
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public User getPatient() {
+        return patient;
+    }
+
+    public void setPatient(User patient) {
+        this.patient = patient;
+    }
+
+    public List<Long> getAppointmentIds() {
+        return appointmentIds;
+    }
+
+    public void setAppointmentIds(List<Long> appointmentIds) {
+        this.appointmentIds = appointmentIds;
     }
 
     public String getObservations() {
@@ -33,6 +45,13 @@ public class MedicalRecordDto {
     public void setObservations(String observations) {
         this.observations = observations;
     }
+
+    public LocalDateTime getRecordDate() {
+        return recordDate;
+    }
+
+    public void setRecordDate(LocalDateTime recordDate) {
+        this.recordDate = recordDate;
+    }
+
 }
-
-

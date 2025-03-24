@@ -1,7 +1,6 @@
 package br.com.vidaplus.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,6 @@ import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Profile;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.AppointmentRepository;
-import br.com.vidaplus.repository.MedicalRecordRepository;
 import br.com.vidaplus.repository.UserRepository;
 import jakarta.transaction.Transactional;
 
@@ -26,21 +24,15 @@ public class AppointmentService {
     
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
-    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordService medicalRecordService;
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository,
                              UserRepository userRepository,
-                             MedicalRecordRepository medicalRecordRepository) {
-    
-        System.out.println("Injetando AppointmentRepository: " + appointmentRepository);
-        System.out.println("Injetando UserRepository: " + userRepository);
-        System.out.println("Injetando MedicalRecordRepository: " + medicalRecordRepository);
+                             MedicalRecordService medicalRecordService) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
-        this.medicalRecordRepository = medicalRecordRepository;
-
-
+        this.medicalRecordService = medicalRecordService;
     }
     // lista todas as consultas
     public List<Appointment> getAllAppointments() {
@@ -84,60 +76,46 @@ public class AppointmentService {
     public Appointment scheduleAppointment(Long patientId, Long healthProfessionalId, 
                                         LocalDateTime dateTime, AppointmentType type, 
                                         String reason, String observations) {
-            
-        try {
-            // Busca o paciente
-            User patient = userRepository.findById(patientId).orElse(null);
-            if (patient == null) {
-                throw new RuntimeException("Paciente não encontrado: " + patientId);
-            }
-
-            // Busca o profissional de saúde
-            User healthProfessional = userRepository.findById(healthProfessionalId).orElse(null);
-            if (healthProfessional == null) {
-                throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
-            }
-
-            // Verifica se o usuário tem o papel de profissional de saúde
-            boolean isHealthProfessional = false;
-            for (AllRole role : healthProfessional.getRoles()) {
-                if (role.getName() == Profile.HEALTH_PROFESSIONAL) {
-                    isHealthProfessional = true;
-                    break;
-                }
-            }
-
-            if (!isHealthProfessional) {
-                throw new RuntimeException("Usuário não é Profissional da Saúde.");
-            }
-
-            // Criação de prontuário
-            MedicalRecord medicalRecord = new MedicalRecord();
-            medicalRecord.setObservations(observations);
-            medicalRecord = medicalRecordRepository.save(medicalRecord);
-
-
-            // Criação e salvamento do Appointment
-            Appointment appointment = new Appointment();
-            appointment.setPatient(patient);
-            appointment.setHealthProfessional(healthProfessional);
-            appointment.setDateTime(dateTime);
-            appointment.setType(type);
-            appointment.setStatus(AppointmentStatus.SCHEDULED);
-            appointment.setReason(reason);
-            appointment.setMedicalRecord(medicalRecord);
-            
-            appointmentRepository.save(appointment);
-
-            // Adiciona a consulta ao MedicalRecord
-            medicalRecord.getAppointments().add(appointment);
-            medicalRecordRepository.save(medicalRecord);
-
-            return appointment;
+        // Busca o paciente
+        User patient = userRepository.findById(patientId).orElse(null);
+        if (patient == null) {
+            throw new RuntimeException("Paciente não encontrado: " + patientId);
         }
-        catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao agendar consulta: " + e.getMessage());
+
+        // Busca o profissional de saúde
+        User healthProfessional = userRepository.findById(healthProfessionalId).orElse(null);
+        if (healthProfessional == null) {
+            throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
         }
+
+        // Verifica se o usuário tem o papel de profissional de saúde
+        boolean isHealthProfessional = false;
+        for (AllRole role : healthProfessional.getRoles()) {
+            if (role.getName() == Profile.HEALTH_PROFESSIONAL) {
+                isHealthProfessional = true;
+                break;
+            }
+        }
+
+        if (!isHealthProfessional) {
+            throw new RuntimeException("Usuário não é Profissional da Saúde.");
+        }
+        
+        // Busca ou cria o Prontuário para o paciente
+        MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
+        
+
+        // Criação e salvamento da consulta
+        Appointment appointment = new Appointment();
+        appointment.setPatient(patient);
+        appointment.setHealthProfessional(healthProfessional);
+        appointment.setDateTime(dateTime);
+        appointment.setType(type);
+        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setReason(reason);
+        appointment.setMedicalRecord(medicalRecord); // Linka o prontuário com a consulta
+        
+        return appointmentRepository.save(appointment);
     }
 
     //Atualizar status da consulta
@@ -213,15 +191,8 @@ public class AppointmentService {
             throw new RuntimeException("Usuário não é Profissional da Saúde.");
         }
 
-        // Atualiza o prontuário associado
-        MedicalRecord medicalRecord = appointment.getMedicalRecord();
-        if (medicalRecord == null) {
-            // Se não houver MedicalRecord associado, cria um novo
-            medicalRecord = new MedicalRecord();
-            medicalRecord.setAppointments(new ArrayList<>());
-        }
-        medicalRecord.setObservations(observations);
-        medicalRecord = medicalRecordRepository.save(medicalRecord);
+        // Busca ou cria o MedicalRecord para o paciente usando o MedicalRecordService
+        MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
 
         // Atualiza os campos da consulta
         appointment.setPatient(patient);
@@ -229,8 +200,7 @@ public class AppointmentService {
         appointment.setDateTime(dateTime);
         appointment.setType(type);
         appointment.setReason(reason);
-        appointment.setMedicalRecord(medicalRecord);
-        
+        appointment.setMedicalRecord(medicalRecord); // Linka
 
         // Salva a consulta atualizada no banco
         Appointment updatedAppointment = appointmentRepository.save(appointment);
@@ -253,14 +223,6 @@ public class AppointmentService {
             Optional<Appointment> appointmentOptional = appointmentRepository.findById(id);
             if (!appointmentOptional.isPresent()) {
                 throw new RuntimeException("Consulta não encontrada: " + id);
-            }
-            Appointment appointment = appointmentOptional.get();
-
-            // Remove a consulta do MedicalRecord associado
-            MedicalRecord medicalRecord = appointment.getMedicalRecord();
-            if (medicalRecord != null) {
-                medicalRecord.getAppointments().remove(appointment);
-                medicalRecordRepository.save(medicalRecord);
             }
     
             // Deleta a consulta
