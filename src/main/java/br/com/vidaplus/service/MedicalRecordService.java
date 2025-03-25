@@ -1,6 +1,9 @@
 package br.com.vidaplus.service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +47,7 @@ public class MedicalRecordService {
 
 
      // Adiciona observações da consulta
-    public void addObservationsToMedicalRecord(MedicalRecord medicalRecord, Appointment appointment, String observations) {
+    public void addObservations(MedicalRecord medicalRecord, Appointment appointment, String observations) {
         // Lança exceção se observations for null
         if (observations == null) {
             throw new IllegalArgumentException("Observações não podem ser nulas.");
@@ -61,10 +64,121 @@ public class MedicalRecordService {
 
         // Adiciona a nova observação às existentes
         String currentObservations = medicalRecord.getObservations();
-        medicalRecord.setObservations(currentObservations + "\n" + formattedObservation);
+        medicalRecord.setObservations((currentObservations + "\n" + formattedObservation).replace("\n", " "));
+
 
         // Salva o MedicalRecord atualizado
         medicalRecordRepository.save(medicalRecord);
         }
 
+
+     // Método para atualizar observações de um prontuário
+     public void updateObservations(MedicalRecord medicalRecord, List<Long> appointmentIds, String newObservations) {
+            // Verifica se as observações são válidas
+            if (newObservations == null || newObservations.trim().isEmpty()) {
+                throw new IllegalArgumentException("Observações não podem ser vazias.");
+            }
+
+            // Adiciona novas observações ao prontuário
+            String currentObservations = medicalRecord.getObservations();
+            String updatedObservations;
+
+            if (currentObservations.isEmpty()) {
+                updatedObservations = newObservations;
+            } 
+            else {
+                updatedObservations = currentObservations + "\n---\n" + newObservations;
+            }
+
+            medicalRecord.setObservations(updatedObservations);
+            medicalRecordRepository.save(medicalRecord);
+            }
+
+    // Método para remover observações por intervalo de datas
+    public int removeObservationEntries(User patient, LocalDateTime startDate, LocalDateTime endDate) {
+        
+        // Busca o prontuário do paciente
+        Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
+
+        // Lança exceção se prontuário não existir
+        if (!medicalRecordOptional.isPresent()) {
+           throw new RuntimeException("Prontuário não encontrado para o paciente.");
+        }
+
+        MedicalRecord medicalRecord = medicalRecordOptional.get();
+        String[] observationEntries = medicalRecord.getObservations().split("\n---\n");
+
+        // Lista para manter observações fora do intervalo
+        List<String> keptEntries = new ArrayList<>();
+        int removedEntries = 0;
+
+        // Itera sobre cada entrada de observação
+        for (String entry : observationEntries) {
+        try {
+            // Tenta extrair a data da primeira linha da entrada
+            String firstLine = entry.split("\n")[0];
+            LocalDateTime entryDate = extractDataEntries(firstLine);
+
+            // Mantém a entrada se estiver fora do intervalo especificado
+            if (entryDate.isBefore(startDate) || entryDate.isAfter(endDate)) {
+                keptEntries.add(entry);
+            } 
+            else {
+                removedEntries++;
+            }
+        } catch (Exception e) {
+        // Se não conseguir extrair a data, mantém a entrada
+        keptEntries.add(entry);
+        }
+        }
+
+        // Atualiza as observações do prontuário
+        medicalRecord.setObservations(String.join("\n---\n", keptEntries));
+        medicalRecordRepository.save(medicalRecord);
+
+        return removedEntries;
+        }
+
+    // Método para deletar prontuário
+    public void deleteMedicalRecord(User patient) {
+    // Busca o prontuário do paciente
+        Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
+
+        // Remove o prontuário se existir
+        if (medicalRecordOptional.isPresent()) {
+            medicalRecordRepository.delete(medicalRecordOptional.get());
+        } 
+        else {
+            throw new RuntimeException("Prontuário não encontrado para o paciente.");
+        }
+        }
+
+        private LocalDateTime extractDataEntries(String entry) {
+            // Procura onde começa "Consulta em " e soma 12 pra pular isso
+            int startIndex = entry.indexOf("Consulta em ") + 12;
+            
+            // Se não achar "Consulta em ", dá erro
+            if (startIndex == -1 + 12) { // -1 + 12 = 11 significa que não achou
+                throw new RuntimeException("Formato de data inválido");
+            }
+            
+            // Pega o texto depois de "Consulta em "
+            String remainingText = entry.substring(startIndex);
+            
+            // Procura onde termina a data (antes de " com")
+            int endIndex = remainingText.indexOf(" com");
+            if (endIndex == -1) { // Se não achar " com", usa o fim do texto
+                endIndex = remainingText.length();
+            }
+            
+            // Pega só a data e tira espaços extras
+            String dateString = remainingText.substring(0, endIndex).trim();
+            
+            // Tenta transformar o texto da data em LocalDateTime
+            try {
+                return LocalDateTime.parse(dateString, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            } catch (Exception e) {
+                throw new RuntimeException("Não deu pra transformar a data");
+            }
+        }
 }

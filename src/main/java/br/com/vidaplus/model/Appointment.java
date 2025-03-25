@@ -2,6 +2,12 @@ package br.com.vidaplus.model;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import br.com.vidaplus.serializer.MedicalRecordIdSerializer;
+import br.com.vidaplus.serializer.UserIdSerializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,10 +31,14 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
+    @JsonSerialize(using = UserIdSerializer.class)
+    @JsonProperty("patientId")
     private User patient;
 
     @ManyToOne
     @JoinColumn(name = "health_professional_id")
+    @JsonSerialize(using = UserIdSerializer.class)
+    @JsonProperty("healthProfessionalId")
     private User healthProfessional;
 
     @Column(nullable = false)
@@ -44,6 +54,9 @@ public class Appointment {
     
     @ManyToOne
     @JoinColumn(name = "medical_record_id", nullable = false)
+    @JsonBackReference
+    @JsonSerialize(using = MedicalRecordIdSerializer.class)
+    @JsonProperty("medicalRecordId")
     private MedicalRecord medicalRecord;
 
 }
