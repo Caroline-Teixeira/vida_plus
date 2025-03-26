@@ -1,10 +1,10 @@
 package br.com.vidaplus.controller;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.MedicalRecordDto;
@@ -143,8 +142,7 @@ public class MedicalRecordController {
     @DeleteMapping("/{patientId}/remove-observations")
     public ResponseEntity<String> removeObservationEntries(
             @PathVariable Long patientId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate) {
+            @RequestBody Map<String, LocalDateTime> dateRange) {
         
         try {
             // Busca o paciente
@@ -153,16 +151,21 @@ public class MedicalRecordController {
                 throw new RuntimeException("Paciente não encontrado: " + patientId);
             }
             User patient = patientOptional.get();
-
+    
             // Remove entradas de observações no intervalo de datas
-            int removedEntries = medicalRecordService.removeObservationEntries(patient, startDate, endDate);
-
+            int removedEntries = medicalRecordService.removeObservationEntries(
+                patient, 
+                dateRange.get("startDate"), 
+                dateRange.get("endDate")
+            );
+    
             return ResponseEntity.ok("Removidas " + removedEntries + " entradas de observações no intervalo de datas.");
         } 
         catch (RuntimeException e) {
             throw new RuntimeException("Erro ao remover entradas de observações para o paciente com id " + patientId + ": " + e.getMessage());
         }
     }
+    
 
     // DELETE para excluir prontuário completo
     @DeleteMapping("/{patientId}")

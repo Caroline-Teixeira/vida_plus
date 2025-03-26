@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import br.com.vidaplus.serializer.ObservationsSerializer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +38,7 @@ public class MedicalRecord {
     private List<Appointment> appointments = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
+    @JsonSerialize(using = ObservationsSerializer.class)
     private String observations;
 
     @Column(name = "record_date", nullable = false, updatable = false)
