@@ -125,17 +125,17 @@ public class MedicalRecordController {
             // Busca o prontuário
             MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
             // Método no service para atualizar observações
-        medicalRecordService.updateObservations(
-            medicalRecord, 
-            medicalRecordDto.getAppointmentIds(), 
-            medicalRecordDto.getObservations()
-        );
+            medicalRecordService.updateObservations(
+                medicalRecord, 
+                medicalRecordDto.getAppointmentIds(), 
+                medicalRecordDto.getObservations()
+            );
 
-        return ResponseEntity.ok("Observações atualizadas com sucesso para o paciente: " + patientId);
-    } 
-    catch (RuntimeException e) {
-        throw new RuntimeException("Erro ao atualizar observações do prontuário do paciente com id " + patientId + ": " + e.getMessage());
-    }
+            return ResponseEntity.ok("Observações atualizadas com sucesso para o paciente: " + patientId);
+        } 
+        catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao atualizar observações do prontuário do paciente com id " + patientId + ": " + e.getMessage());
+        }
     }
 
     // DELETE para remover entradas de observações por data
@@ -165,7 +165,6 @@ public class MedicalRecordController {
             throw new RuntimeException("Erro ao remover entradas de observações para o paciente com id " + patientId + ": " + e.getMessage());
         }
     }
-    
 
     // DELETE para excluir prontuário completo
     @DeleteMapping("/{patientId}")
@@ -189,4 +188,3 @@ public class MedicalRecordController {
         }
     }
 }
-
