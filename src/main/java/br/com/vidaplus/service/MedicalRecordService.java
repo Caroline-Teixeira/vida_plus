@@ -38,7 +38,7 @@ public class MedicalRecordService {
             return medicalRecordOptional.get();
         }
 
-        // Se não existir, cria um novo MedicalRecord
+        // Se não existir, cria um novo prontuário
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setPatient(patient);
         medicalRecord.setRecordDate(LocalDateTime.now());
