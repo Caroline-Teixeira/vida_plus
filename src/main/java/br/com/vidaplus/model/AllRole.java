@@ -1,5 +1,7 @@
 package br.com.vidaplus.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -17,15 +19,16 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class AllRole {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long id;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("name")
     private Profile name;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("permissionValue")
     private PermissionState permissionValue;
-    
 }

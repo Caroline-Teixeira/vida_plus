@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,8 +41,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override  // filtros pra pegar o e-mail
     @SuppressWarnings("UnnecessaryReturnStatement")
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException { String authHeader = request.getHeader("Authorization");
-
+            throws ServletException, IOException { 
+                
+                
+        String authHeader = request.getHeader("Authorization");
+        
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -65,21 +68,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Busca o usuário no banco de dados usando o UserRepository
+        // Busca o usuário no banco de dados usando o UserRepository
         Optional<User> userOptional = userRepository.findByEmail(email);
-        User user;
-        if (userOptional.isPresent()) {
-            user = userOptional.get();
-        } else {
-            throw new RuntimeException("Usuário não encontrado com o email: " + email);
+        if (userOptional.isEmpty()) {
+            throw new UsernameNotFoundException("Usuário não encontrado com o email: " + email);
         }
+        User user = userOptional.get();
 
-        // Converte os papéis (AllRole) do usuário em uma lista de autoridades
-        List<GrantedAuthority> authorities = new ArrayList<>(); // arrumar
-        Set<AllRole> roles = user.getRoles();
-        for (AllRole role : roles) {
+        // Adiciona uma única linha de log aqui
+        System.out.println("Filtro JWT - Token: " + jwt + ", Email: " + email + ", User: " + user + ", Roles: " + user.getRoles());
+
+        // Converter os papéis (AllRole) em uma lista de autoridades
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (AllRole role : user.getRoles()) {
             authorities.add(new SimpleGrantedAuthority(role.getName().toString()));
         }
+
+        // Criar o token de autenticação e definir no contexto do Spring Security
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(user, null, authorities);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } 
         catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | SignatureException | ServletException | IOException | IllegalArgumentException | UsernameNotFoundException e) { // Captura todas as exceções em um único bloco

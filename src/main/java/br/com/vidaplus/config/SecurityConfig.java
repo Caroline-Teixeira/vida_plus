@@ -31,8 +31,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Define que a API é stateless (sem sessões)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
-                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
-                .requestMatchers("/api/patient/**").hasAnyAuthority("PATIENT", "ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers("/api/users/**").permitAll()   //.hasAuthority("ADMIN") // 
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); //nome longo arrumar

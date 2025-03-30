@@ -1,5 +1,6 @@
 package br.com.vidaplus.service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -7,6 +8,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.model.AllRole;
@@ -29,7 +33,31 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        List<User> users = new ArrayList<>();
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    
+        if (auth == null) {
+            System.out.println("Nenhuma autenticação encontrada. Usuários encontrados: " + users);
+            return users;
+        }
+    
+        System.out.println("Autoridades no contexto de segurança: " + auth.getAuthorities()); // Adicione este log
+    
+        boolean isAdmin = false;
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            System.out.println("Verificando autoridade: " + authority.getAuthority()); // Adicione este log
+            if (authority.getAuthority().equals("ADMIN")) {
+                isAdmin = true;
+                break;
+            }
+        }
+    
+        if (isAdmin) {
+            users = userRepository.findAll();
+        }
+    
+        System.out.println("Usuários encontrados: " + users);
+        return users;
     }
     
     // Verifica se é nulo

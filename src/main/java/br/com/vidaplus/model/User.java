@@ -1,16 +1,16 @@
 package br.com.vidaplus.model;
 
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.springframework.format.annotation.DateTimeFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,41 +26,44 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class User {
-
-    // ATRIBUTOS
     @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty("id")
     private Long id;
-    
-    @Column(name="Name")
+
+    @Column(name = "Name")
+    @JsonProperty("name")
     private String name;
-    
-    @Column(name="CPF")
+
+    @Column(name = "CPF")
+    @JsonProperty("cpf")
     private String cpf;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    @JsonProperty("dateOfBirth")
     private LocalDate dateOfBirth;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("gender")
     private Gender gender;
 
-    @Column(name="Phone")
+    @Column(name = "Phone")
+    @JsonProperty("contact")
     private String contact;
 
-    @Column (name="E-mail")
+    @Column(name = "E-mail")
+    @JsonProperty("email")
     private String email;
 
-    @Column (name="password")
+    @Column(name = "password")
+    @JsonProperty("password")
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles",
-        joinColumns= @JoinColumn(name= "user_id"),
-        inverseJoinColumns = @JoinColumn(name="role_id")
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonProperty("roles")
     private Set<AllRole> roles = new HashSet<>();
-    
-    
 }
-
