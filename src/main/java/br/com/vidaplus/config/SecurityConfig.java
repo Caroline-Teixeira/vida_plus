@@ -2,11 +2,10 @@ package br.com.vidaplus.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -31,7 +30,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Define que a API é stateless (sem sessões)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
-                .requestMatchers("/api/users/**").permitAll()   //.hasAuthority("ADMIN") // 
+                .requestMatchers("/auth/logout").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.POST, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); //nome longo arrumar
@@ -42,10 +45,10 @@ public class SecurityConfig {
 
     // Define o codificador de senhas que será usado para criptografar as senhas dos usuários
     // O BCrypt é um algoritmo seguro e amplamente usado para hashing de senhas
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    //@Bean
+    //public PasswordEncoder passwordEncoder() {
+       // return new BCryptPasswordEncoder();
+    //}
 
     
 }

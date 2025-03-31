@@ -43,17 +43,20 @@ public class UserService {
     
         System.out.println("Autoridades no contexto de segurança: " + auth.getAuthorities()); // Adicione este log
     
-        boolean isAdmin = false;
+        boolean hasPermission = false;
         for (GrantedAuthority authority : auth.getAuthorities()) {
-            System.out.println("Verificando autoridade: " + authority.getAuthority()); // Adicione este log
-            if (authority.getAuthority().equals("ADMIN")) {
-                isAdmin = true;
+            System.out.println("Verificando autoridade: " + authority.getAuthority());
+            if (authority.getAuthority().equals("ADMIN") || authority.getAuthority().equals("ATTENDANT")) {
+                hasPermission = true;
                 break;
             }
         }
-    
-        if (isAdmin) {
+
+        System.out.println("Usuário tem permissão (ADMIN ou ATTENDANT): " + hasPermission);
+
+        if (hasPermission) {
             users = userRepository.findAll();
+            System.out.println("Resultado de findAll: " + users);
         }
     
         System.out.println("Usuários encontrados: " + users);

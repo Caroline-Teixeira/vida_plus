@@ -9,7 +9,6 @@ import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,18 +18,17 @@ import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 
 @RestController
-@RequestMapping("/auth") // Define o prefixo para as rotas dessa classe
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final UserRepository userRepository; // Repositório para buscar usuários no banco de dados
-    private final PasswordEncoder passwordEncoder; // Encoder para verificar senhas
-    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Chave secreta para assinar tokens JWT
+    private final UserRepository userRepository;
+    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Deve ser a mesma usada no JwtAuthenticationFilter
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -38,47 +36,50 @@ public class AuthController {
         String email = loginRequest.get("email");
         String password = loginRequest.get("password");
 
+        // Valida os campos
         if (email == null || password == null) {
             throw new BadCredentialsException("Email e senha são obrigatórios");
         }
 
-        User user = userRepository.findByEmail(email).orElseThrow(() -> 
-            new BadCredentialsException("Usuário não encontrado com o email: " + email));
+        // Busca o usuário pelo email
+        User user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado com o email: " + email));
 
-        // Substitua a validação BCrypt por comparação direta (apenas para testes)
-    if (!password.equals(user.getPassword())) {
-        throw new BadCredentialsException("Senha incorreta");
-    }
+        // Compara a senha (sem criptografia, conforme sua configuração)
+        if (!password.equals(user.getPassword())) {
+            throw new BadCredentialsException("Senha incorreta");
+        }
 
-        // Adicione os logs aqui para depurar o email e o usuário encontrado
-        System.out.println("Email: " + email);
-        System.out.println("Usuário encontrado: " + user);
-
-        // Obtém os papéis do usuário e converte para lista de strings
+        // Obtém os papéis do usuário e converte para uma lista de strings usando um loop for
         Set<AllRole> userRoles = user.getRoles();
         List<String> roles = new ArrayList<>();
-
         for (AllRole role : userRoles) {
             roles.add(role.getName().toString());
         }
 
-        // Define tempo de expiração do token (7 dias)
-        long expirationTime = 7 * 24 * 60 * 60 * 1000L;
+        // Define o tempo de expiração do token (7 dias)
+        long expirationTime = 7 * 24 * 60 * 60 * 1000L; // 7 dias em milissegundos
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
-         // Gera token JWT usando o mesmo método do JwtAuthenticationFilter
-         String jwt = Jwts.builder()
-         .setSubject(user.getEmail())
-         .setIssuedAt(new Date())
-         .setExpiration(expirationDate)
-         .claim("roles", roles)
-         .signWith(io.jsonwebtoken.security.Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
-         .compact();
+        // Gera o token JWT usando a nova API de assinatura
+        String token = Jwts.builder()
+            .setSubject(user.getEmail())
+            .setIssuedAt(new Date())
+            .setExpiration(expirationDate)
+            .claim("roles", roles)
+            .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())) // Nova API para assinatura
+            .compact();
 
-        // Adicione o log aqui para verificar o token gerado
-        System.out.println("Token gerado: " + jwt);
+        // Retorna o token na resposta
         Map<String, String> response = new HashMap<>();
-        response.put("token", jwt);
+        response.put("token", token);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout() {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Logout bem-sucedido.");
         return ResponseEntity.ok(response);
     }
 }
