@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -20,6 +21,7 @@ public class SecurityConfig {
 
     
     private final UserRepository userRepository;
+    
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,23 +34,35 @@ public class SecurityConfig {
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
                 .requestMatchers("/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/appointments").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.GET, "/api/appointments/patient/{patientId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/appointments/healthProfessional/{healthProfessionalId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/medical-records/patient/{patientId}").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.PUT, "/api/users/**").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.DELETE, "/api/users/**").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.POST, "/api/appointments").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.POST, "/api/medical-records/{patientId}/add-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.PUT, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.PUT, "/api/medical-records/{patientId}/update-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.DELETE, "/api/medical-records/{patientId}/remove-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.DELETE, "/api/medical-records/{patientId}").hasAnyAuthority("ADMIN")
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); //nome longo arrumar
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); 
             // Garante que o token JWT será validado antes de qualquer outra verificação de autenticação
 
         return http.build();
     }
 
-    // Define o codificador de senhas que será usado para criptografar as senhas dos usuários
-    // O BCrypt é um algoritmo seguro e amplamente usado para hashing de senhas
-    //@Bean
-    //public PasswordEncoder passwordEncoder() {
-       // return new BCryptPasswordEncoder();
-    //}
+    // Define o codificador de senhas que será usado para criptografar as senhas dos usuários - hash
+    @Bean
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 
     
 }

@@ -74,15 +74,15 @@ public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable 
 }
     
     // GET consulta por profissional
-@GetMapping("/healthProfessional/{healthProfessionalId}")
-public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
-    try {
-        List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
-        return ResponseEntity.ok(appointments);
-    } catch (RuntimeException e) {
-        throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
+    @GetMapping("/healthProfessional/{healthProfessionalId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
+            return ResponseEntity.ok(appointments);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
+        }
     }
-}
 
      // GET Agenda do profissional. (TO DO na camada service)
      @GetMapping("/available/{healthProfessionalId}")

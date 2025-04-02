@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,10 +23,12 @@ import br.com.vidaplus.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final BCryptPasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserController(UserService userService){
+    public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder){
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // GET por Lista - todos os usuários
@@ -70,7 +73,7 @@ public class UserController {
     user.setDateOfBirth(userDto.getDateOfBirth());
     user.setGender(userDto.getGender());
     user.setContact(userDto.getContact());
-    user.setPassword(userDto.getPassword());
+    user.setPassword(passwordEncoder.encode(userDto.getPassword()));
 
 
     return userService.registerUser(user, userDto.getRoles());
@@ -84,24 +87,30 @@ public class UserController {
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);
         }
-        System.out.println("Senha recebida: " + userDto.getPassword()); // Debug
+        //System.out.println("Senha recebida: " + userDto.getPassword()); // Debug
         
         user.setName(userDto.getName());
         user.setDateOfBirth(userDto.getDateOfBirth());
         user.setGender(userDto.getGender());
         user.setContact(userDto.getContact());
-        if (!user.getEmail().equals(userDto.getEmail()) && 
-            userService.existsByEmail(userDto.getEmail())) {
-            throw new RuntimeException("E-mail existente " + userDto.getEmail());
+
+        
+        // Verifica se o email foi alterado e se já existe
+        if (!user.getEmail().equals(userDto.getEmail()) && userService.existsByEmail(userDto.getEmail())) {
+            throw new RuntimeException("E-mail existente: " + userDto.getEmail());
         }
         user.setEmail(userDto.getEmail());
-        user.setPassword(userDto.getPassword());
-        
+
+        // Criptografa a senha apenas se ela foi fornecida
+        if (userDto.getPassword() != null && !userDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        }
+
         // Valida se o campo roles foi fornecido
         if (userDto.getRoles() == null || userDto.getRoles().isEmpty()) {
             throw new RuntimeException("O campo 'roles' é obrigatório");
         }
-        
+
         // Atualiza o usuário e os papéis
         return userService.updateUser(user, userDto.getRoles());
     }

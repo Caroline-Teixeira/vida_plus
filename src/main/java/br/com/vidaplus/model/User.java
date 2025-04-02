@@ -55,7 +55,7 @@ public class User {
     private String email;
 
     @Column(name = "password")
-    @JsonProperty("password")
+    @JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY) // para não exibir a senha na API
     private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)

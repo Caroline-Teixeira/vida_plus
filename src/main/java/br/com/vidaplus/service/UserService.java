@@ -41,7 +41,7 @@ public class UserService {
             return users;
         }
     
-        System.out.println("Autoridades no contexto de segurança: " + auth.getAuthorities()); // Adicione este log
+        System.out.println("Autoridades no contexto de segurança: " + auth.getAuthorities()); // log de autoridades
     
         boolean hasPermission = false;
         for (GrantedAuthority authority : auth.getAuthorities()) {

@@ -1,10 +1,14 @@
 package br.com.vidaplus.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.model.AllRole;
@@ -36,15 +40,36 @@ public class AppointmentService {
     }
     // lista todas as consultas
     public List<Appointment> getAllAppointments() {
-        try {
+        
             System.out.println("Buscando todos os agendamentos...");
-            List<Appointment> appointments = appointmentRepository.findAll();
-            System.out.println("Total de agendamentos encontrados: " + appointments.size());
-            return appointments;
-        } catch (Exception e) {
-            System.out.println("Erro ao buscar agendamentos: " + e.getMessage());
-            throw new RuntimeException("Erro ao acessar o banco de dados: " + e.getMessage());
+            List<Appointment> appointments = new ArrayList<>();
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            
+            if (auth == null) {
+                System.out.println("Nenhuma autenticação encontrada. Consultas encontradas: " + appointments);
+                return appointments;
+            }
+
+            System.out.println("Autoridades no contexto de segurança: " + auth.getAuthorities()); // log de autoridades
+    
+        boolean hasPermission = false;
+        for (GrantedAuthority authority : auth.getAuthorities()) {
+            System.out.println("Verificando autoridade: " + authority.getAuthority());
+            if (authority.getAuthority().equals("ADMIN") || authority.getAuthority().equals("ATTENDANT")) {
+                hasPermission = true;
+                break;
+            }
         }
+
+        System.out.println("Usuário tem permissão (ADMIN ou ATTENDANT): " + hasPermission);
+
+        if (hasPermission) {
+            appointments = appointmentRepository.findAll();
+            System.out.println("Resultado de findAll: " + appointments);
+        }
+    
+        System.out.println("Consultas encontradas: " + appointments);
+        return appointments;  
     }
     
     public Optional<Appointment> getAppointmentById(Long id) {

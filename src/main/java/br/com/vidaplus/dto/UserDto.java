@@ -3,6 +3,8 @@ package br.com.vidaplus.dto;
 import java.time.LocalDate;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import br.com.vidaplus.model.Gender;
 import br.com.vidaplus.model.Profile;
 
@@ -14,6 +16,8 @@ public class UserDto {
     private Gender gender;
     private String contact;
     private String email;
+    
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) // para não exibir a senha na API
     private String password;
     private Set<Profile> roles;
 

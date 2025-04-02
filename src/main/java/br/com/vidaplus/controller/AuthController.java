@@ -9,6 +9,7 @@ import java.util.Set;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,10 +26,12 @@ import io.jsonwebtoken.security.Keys;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
     private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Deve ser a mesma usada no JwtAuthenticationFilter
 
-    public AuthController(UserRepository userRepository) {
+    public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostMapping("/login")
@@ -45,8 +48,8 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado com o email: " + email));
 
-        // Compara a senha (sem criptografia, conforme sua configuração)
-        if (!password.equals(user.getPassword())) {
+        // Compara a senha (com criptografia)
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Senha incorreta");
         }
 
