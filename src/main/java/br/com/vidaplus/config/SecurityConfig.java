@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/medical-records/{patientId}/add-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.PUT, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.PUT, "/api/appointments/{id}/status").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.PUT, "/api/medical-records/{patientId}/update-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
                 .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")

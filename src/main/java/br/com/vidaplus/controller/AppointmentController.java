@@ -33,22 +33,21 @@ public class AppointmentController {
     }
 
 // GET lista de consultas
-@GetMapping
+    @GetMapping
     public ResponseEntity<List<Appointment>> getAllAppointments() {
         try {
             List<Appointment> appointments = appointmentService.getAllAppointments();
-            if (appointments != null) {
-                return ResponseEntity.ok(appointments);
-            } else {
-                throw new RuntimeException("Nenhum consulta encontrada");
+            if (appointments.isEmpty()) {
+                throw new RuntimeException("Nenhuma consulta encontrada ou acesso negado");
             }
+            return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao buscar consultas: " + e.getMessage());
         }
     }
 
 // GET lista de uma consulta
-@GetMapping("/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long id) {
         try {
             Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
@@ -62,22 +61,25 @@ public class AppointmentController {
         }
     }
 
-// GET consulta por paciente
-@GetMapping("/patient/{patientId}")
-public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
-    try {
-        List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
-        return ResponseEntity.ok(appointments);
-    } catch (RuntimeException e) {
-        throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
+    // GET consulta por paciente
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
+        try {
+            List<Appointment> appointments = appointmentService.getAppointmentsByPatient(patientId);
+            return ResponseEntity.ok(appointments);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar consultas do paciente com id " + patientId + ": " + e.getMessage());
+        }
     }
-}
     
     // GET consulta por profissional
     @GetMapping("/healthProfessional/{healthProfessionalId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
         try {
             List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
+            if (appointments.isEmpty()) {
+                throw new RuntimeException("Nenhuma consulta encontrada para o profissional ou acesso negado: " + healthProfessionalId);
+            }
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
@@ -113,12 +115,11 @@ public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable 
                 appointmentDto.getType(),
                 appointmentDto.getReason(),
                 appointmentDto.getObservations()
-
             );
             if (appointment != null) {
-                return ResponseEntity.ok(appointment);
+                return ResponseEntity.status(201).body(appointment); // 201 Created
             } else {
-                throw new RuntimeException("Erro ao agendar consulta");
+                throw new RuntimeException("Erro ao agendar consulta: acesso negado ou dados inválidos");
             }
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao agendar consulta: " + e.getMessage());
@@ -169,7 +170,21 @@ public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAppointment(@PathVariable Long id) {
         try {
+            // Verifica se a consulta existe antes de tentar deletar
+            Optional<Appointment> appointmentBefore = appointmentService.getAppointmentById(id);
+            if (!appointmentBefore.isPresent()) {
+                throw new RuntimeException("Consulta não encontrada: " + id);
+            }
+
+            // Tenta deletar
             appointmentService.deleteAppointment(id);
+
+            // Verifica se a consulta ainda existe
+            Optional<Appointment> appointmentAfter = appointmentService.getAppointmentById(id);
+            if (appointmentAfter.isPresent()) {
+                throw new RuntimeException("Erro ao deletar consulta: acesso negado: " + id);
+            }
+
             return ResponseEntity.ok("Consulta deletada com sucesso");
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao deletar consulta com id " + id + ": " + e.getMessage());
