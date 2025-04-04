@@ -38,14 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        // Extrai o token do cabeçalho Authorization
+        
+        // Pra extração do token do cabeçalho Authorization
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7); // Remove "Bearer " do início
+        String token = authHeader.substring(7); // Remove "Bearer " do início no postman
 
         try {
             // Valida o token e extrai as claims usando a nova API
@@ -61,15 +62,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Busca o usuário pelo email
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
 
-            // Extrai os papéis do token
+            // Extrai os papéis do token (para o acesso)
             @SuppressWarnings("unchecked")
             List<String> roles = (List<String>) claims.get("roles");
 
-            // Converte os papéis em autoridades
+            // Lista para converter os papéis em autoridades
             List<GrantedAuthority> authorities = new ArrayList<>();
             if (roles != null) {
                 for (String role : roles) {

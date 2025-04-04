@@ -37,9 +37,6 @@ public class AppointmentController {
     public ResponseEntity<List<Appointment>> getAllAppointments() {
         try {
             List<Appointment> appointments = appointmentService.getAllAppointments();
-            if (appointments.isEmpty()) {
-                throw new RuntimeException("Nenhuma consulta encontrada ou acesso negado");
-            }
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao buscar consultas: " + e.getMessage());
@@ -48,17 +45,8 @@ public class AppointmentController {
 
 // GET lista de uma consulta
     @GetMapping("/{id}")
-    public ResponseEntity<Appointment> getAppointmentById(@PathVariable Long id) {
-        try {
-            Optional<Appointment> appointment = appointmentService.getAppointmentById(id);
-            if (appointment.isPresent()) {
-                return ResponseEntity.ok(appointment.get());
-            } else {
-                throw new RuntimeException("Consulta não encontrada: " + id);
-            }
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar consulta: " + id + ": " + e.getMessage());
-        }
+    public Appointment getAppointmentById(@PathVariable Long id) {
+        return appointmentService.getAppointmentById(id).orElse(null);
     }
 
     // GET consulta por paciente
@@ -77,9 +65,6 @@ public class AppointmentController {
     public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
         try {
             List<Appointment> appointments = appointmentService.getAppointmentsByHealthProfessional(healthProfessionalId);
-            if (appointments.isEmpty()) {
-                throw new RuntimeException("Nenhuma consulta encontrada para o profissional ou acesso negado: " + healthProfessionalId);
-            }
             return ResponseEntity.ok(appointments);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
@@ -116,11 +101,11 @@ public class AppointmentController {
                 appointmentDto.getReason(),
                 appointmentDto.getObservations()
             );
-            if (appointment != null) {
-                return ResponseEntity.status(201).body(appointment); // 201 Created
-            } else {
-                throw new RuntimeException("Erro ao agendar consulta: acesso negado ou dados inválidos");
-            }
+            //if (appointment != null) {
+                return ResponseEntity.ok(appointment);
+            //} else {
+                //throw new RuntimeException("Erro ao agendar consulta: acesso negado ou dados inválidos");
+            //}
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao agendar consulta: " + e.getMessage());
         }
@@ -132,11 +117,8 @@ public class AppointmentController {
             @PathVariable Long id, @RequestBody AppointmentStatus status) {
         try {
             Appointment appointment = appointmentService.updateAppointmentStatus(id, status);
-            if (appointment != null) {
-                return ResponseEntity.ok(appointment);
-            } else {
-                throw new RuntimeException("Consulta não encontrada com id: " + id);
-            }
+            return ResponseEntity.ok(appointment);
+           
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao atualizar status da consulta com id " + id + ": " + e.getMessage());
         }
@@ -156,11 +138,9 @@ public class AppointmentController {
                 appointmentDto.getReason(),
                 appointmentDto.getObservations()
             );
-            if (appointment != null) {
-                return ResponseEntity.ok(appointment);
-            } else {
-                throw new RuntimeException("Consulta não encontrada com id: " + id);
-            }
+            
+            return ResponseEntity.ok(appointment);
+            
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao atualizar consulta com id " + id + ": " + e.getMessage());
         }
