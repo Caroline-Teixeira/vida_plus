@@ -39,7 +39,7 @@ public class UserController {
         System.out.println("Controller - Usuários retornados: " + users);
         return users;
 
-        //return userService.getAllUsers();
+        
     }
 
     // GET por id
@@ -48,7 +48,14 @@ public class UserController {
         return userService.getUserById(id).orElse(null);
     }
 
-    //Post para registrar usuário
+    // GET para obter dados usuário logado
+    @GetMapping("/current")
+    public User getCurrentUser() {
+        return userService.getCurrentAuthenticatedUser();
+}
+
+
+    //POST para registrar usuário
     @PostMapping
     public User registerUser(@RequestBody UserDto userDto) {
     // Verifica se o email e cpf existe

@@ -1,8 +1,11 @@
 package br.com.vidaplus.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,14 +28,17 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final UserRepository userRepository;
     private final MedicalRecordService medicalRecordService;
+    private final UserService userService;
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository,
                              UserRepository userRepository,
-                             MedicalRecordService medicalRecordService) {
+                             MedicalRecordService medicalRecordService,
+                             UserService userService) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
         this.medicalRecordService = medicalRecordService;
+        this.userService = userService;
     }
     
     // lista todas as consultas
@@ -53,7 +59,6 @@ public class AppointmentService {
         return appointmentRepository.findById(id);
     }
     
-
     // consulta por paciente
     public List<Appointment> getAppointmentsByPatient(Long patientId){
         User patient = userRepository.findById(patientId).orElse(null);
@@ -74,6 +79,27 @@ public class AppointmentService {
             throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
         }
     }
+
+    // consulta do usuário atual
+    public List<Appointment> getAppointmentsByCurrentUser() {
+    try {
+        // Obtém o usuário autenticado
+        User currentUser = userService.getCurrentAuthenticatedUser();
+
+        // Busca consultas como paciente e como profissional de saúde
+        List<Appointment> appointmentsAsPatient = appointmentRepository.findByPatient(currentUser);
+        List<Appointment> appointmentsAsProfessional = appointmentRepository.findByHealthProfessional(currentUser);
+
+        // Combina as listas em um Set para evitar duplicatas
+        Set<Appointment> allAppointments = new HashSet<>();
+        allAppointments.addAll(appointmentsAsPatient);
+        allAppointments.addAll(appointmentsAsProfessional);
+
+        return new ArrayList<>(allAppointments);
+    } catch (Exception e) {
+        throw new RuntimeException("Erro ao buscar consultas: " + e.getMessage());
+    }
+}
 
     // Marcar consulta
     public Appointment scheduleAppointment(Long patientId, Long healthProfessionalId, 

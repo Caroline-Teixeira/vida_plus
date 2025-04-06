@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.model.AllRole;
@@ -32,6 +33,7 @@ public class UserService {
         this.allRoleRepository = allRoleRepository;
     }
 
+    // Lista todos os usuários
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -63,12 +65,28 @@ public class UserService {
         return users;
     }
     
-    // Verifica se é nulo
+    // Usuário por id
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
     
-    // Verifica se é nulo
+    // Dados do usuário logado
+    public User getCurrentAuthenticatedUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) {
+            throw new UsernameNotFoundException("Usuário não autenticado.");
+        }
+
+        Object principal = auth.getPrincipal();
+        if (!(principal instanceof User)) {
+            throw new UsernameNotFoundException("Usuário autenticado não encontrado.");
+        }
+
+        return (User) principal;
+    }
+
+    
+    // Usuário por email
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }

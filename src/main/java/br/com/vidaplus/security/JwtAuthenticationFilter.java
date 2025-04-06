@@ -9,8 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.UserRepository;
 import io.jsonwebtoken.Claims;
@@ -29,7 +31,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final UserRepository userRepository;
-    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Deve ser a mesma usada no AuthController
+    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456";
 
     public JwtAuthenticationFilter(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -39,53 +41,54 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
-        // Pra extração do token do cabeçalho Authorization
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("Nenhum token JWT encontrado no cabeçalho Authorization");
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authHeader.substring(7); // Remove "Bearer " do início no postman
+        String token = authHeader.substring(7);
+        System.out.println("Token JWT recebido: " + token);
 
         try {
-            // Valida o token e extrai as claims usando a nova API
             Claims claims = Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())) // Nova API para validação
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
 
             String email = claims.getSubject();
             if (email == null) {
+                System.out.println("Email não encontrado no token");
                 filterChain.doFilter(request, response);
                 return;
             }
+            System.out.println("Email extraído do token: " + email);
 
             User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
+            System.out.println("Usuário encontrado: " + user.getEmail());
 
-            // Extrai os papéis do token (para o acesso)
-            @SuppressWarnings("unchecked")
-            List<String> roles = (List<String>) claims.get("roles");
-
-            // Lista para converter os papéis em autoridades
             List<GrantedAuthority> authorities = new ArrayList<>();
-            if (roles != null) {
-                for (String role : roles) {
-                    authorities.add(new SimpleGrantedAuthority(role));
-                }
+            System.out.println("Papéis associados ao usuário: " + user.getRoles());
+            for (AllRole role : user.getRoles()) {
+                String roleName = role.getName().toString();
+                System.out.println("Adicionando autoridade: " + roleName);
+                authorities.add(new SimpleGrantedAuthority(roleName));
             }
 
-            // Configura o contexto de segurança
+            System.out.println("Autoridades configuradas para o usuário " + email + ": " + authorities);
+
             UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            // Continua o fluxo da requisição
             filterChain.doFilter(request, response);
 
         } catch (ExpiredJwtException | MalformedJwtException | UnsupportedJwtException | SignatureException | WeakKeyException | ServletException | IOException | IllegalArgumentException e) {
+            System.out.println("Erro ao validar token JWT: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token inválido ou expirado");
         }
     }

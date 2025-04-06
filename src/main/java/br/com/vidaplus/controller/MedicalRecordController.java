@@ -58,6 +58,17 @@ public class MedicalRecordController {
         }
     }
 
+    // GET prontuário do usuário atual
+    @GetMapping("/current")
+    public ResponseEntity<MedicalRecord> getCurrentUserMedicalRecord() {
+        try {
+            MedicalRecord medicalRecord = medicalRecordService.findMedicalRecordByCurrentUser();
+            return ResponseEntity.ok(medicalRecord);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar prontuário do usuário atual: " + e.getMessage());
+        }
+    }
+
     // POST - adicionar observações ao prontuário
     @PostMapping("/{patientId}/add-observations")
     public ResponseEntity<String> addObservations(

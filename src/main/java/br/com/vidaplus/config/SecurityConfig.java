@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+
 public class SecurityConfig {
 
     
@@ -31,25 +32,28 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Define que a API é stateless (sem sessões)
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.GET, "/api/users/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT") // Dados do usuário autenticado
+                .requestMatchers(HttpMethod.GET, "/api/appointments/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
+                .requestMatchers(HttpMethod.GET, "/api/medical-records/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
                 .requestMatchers("/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
-                .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
+                .requestMatchers(HttpMethod.GET, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.GET, "/api/appointments").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.GET, "/api/appointments/patient/{patientId}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/appointments/healthProfessional/{healthProfessionalId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
-                .requestMatchers(HttpMethod.GET, "/api/medical-records/patient/{patientId}").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/appointments/patient/{patientId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/appointments/healthProfessional/{healthProfessionalId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/medical-records/patient/{patientId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.POST, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.POST, "/api/appointments").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.POST, "/api/medical-records/{patientId}/add-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.POST, "/api/medical-records/{patientId}/add-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.PUT, "/api/users/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.PUT, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.PUT, "/api/appointments/{id}/status").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.PUT, "/api/medical-records/{patientId}/update-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.PUT, "/api/medical-records/{patientId}/update-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.DELETE, "/api/users/{id}").hasAnyAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/appointments/{id}").hasAnyAuthority("ADMIN", "ATTENDANT")
-                .requestMatchers(HttpMethod.DELETE, "/api/medical-records/{patientId}/remove-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFISSIONAL")
+                .requestMatchers(HttpMethod.DELETE, "/api/medical-records/{patientId}/remove-observations").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.DELETE, "/api/medical-records/{patientId}").hasAnyAuthority("ADMIN")
                 .anyRequest().authenticated()
             )

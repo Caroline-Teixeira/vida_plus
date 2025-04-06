@@ -49,7 +49,7 @@ public class AppointmentController {
         return appointmentService.getAppointmentById(id).orElse(null);
     }
 
-    // GET consulta por paciente
+// GET consulta por paciente
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
         try {
@@ -60,7 +60,7 @@ public class AppointmentController {
         }
     }
     
-    // GET consulta por profissional
+// GET consulta por profissional
     @GetMapping("/healthProfessional/{healthProfessionalId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
         try {
@@ -69,6 +69,12 @@ public class AppointmentController {
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao buscar consultas do profissional com id " + healthProfessionalId + ": " + e.getMessage());
         }
+    }
+
+// GET consulta do usuário atual
+@GetMapping("/current")
+    public List<Appointment> getCurrentUserAppointments() {
+        return appointmentService.getAppointmentsByCurrentUser();
     }
 
      // GET Agenda do profissional. (TO DO na camada service)

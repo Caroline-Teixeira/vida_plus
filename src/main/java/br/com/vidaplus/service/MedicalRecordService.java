@@ -20,11 +20,13 @@ import br.com.vidaplus.repository.MedicalRecordRepository;
 public class MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
+    private final UserService userService;
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Autowired
-    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository) {
+    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository, UserService userService) {
         this.medicalRecordRepository = medicalRecordRepository;
+        this.userService = userService;
     }
 
     // Busca prontuário por paciente
@@ -44,6 +46,22 @@ public class MedicalRecordService {
         medicalRecord.setRecordDate(LocalDateTime.now());
         medicalRecord.setObservations(""); // Inicializa como vazio
         return medicalRecordRepository.save(medicalRecord);
+    }
+
+    // Busca prontuário do usuário logado
+    public MedicalRecord findMedicalRecordByCurrentUser() {
+        try {
+            //o usuário autenticado
+            User currentUser = userService.getCurrentAuthenticatedUser();
+    
+            Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(currentUser);
+            if (!medicalRecordOptional.isPresent()) {
+                throw new RuntimeException("Prontuário não encontrado para o usuário atual.");
+            }
+            return medicalRecordOptional.get();
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Erro ao buscar prontuário do usuário atual: " + e.getMessage());
+        }
     }
 
     // Adiciona observações da consulta
@@ -74,7 +92,7 @@ public class MedicalRecordService {
         medicalRecordRepository.save(medicalRecord);
     }
 
-    // Método para atualizar observações de um prontuário
+    // Atualiza as observações de um prontuário
     public void updateObservations(MedicalRecord medicalRecord, List<Long> appointmentIds, String newObservations) {
         // Verifica se as observações são válidas
         if (newObservations == null || newObservations.trim().isEmpty()) {
@@ -96,7 +114,7 @@ public class MedicalRecordService {
         medicalRecordRepository.save(medicalRecord);
     }
 
-    // Método para remover observações por intervalo de datas
+    // Remove as observações por intervalo de datas
     public int removeObservationEntries(User patient, LocalDateTime startDate, LocalDateTime endDate) {
         // Busca o prontuário do paciente
         Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
@@ -147,7 +165,7 @@ public class MedicalRecordService {
         return removedEntries;
     }
 
-    // Método para deletar prontuário
+    // Deleta prontuário
     public void deleteMedicalRecord(User patient) {
         // Busca o prontuário do paciente
         Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
