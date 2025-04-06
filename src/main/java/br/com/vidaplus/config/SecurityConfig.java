@@ -32,6 +32,8 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Define que a API é stateless (sem sessões)
             .authorizeHttpRequests(authorize -> authorize
+                .requestMatchers(HttpMethod.GET, "/api/audit-records/all").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/audit-records/filter").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/users/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT") // Dados do usuário autenticado
                 .requestMatchers(HttpMethod.GET, "/api/appointments/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/medical-records/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")

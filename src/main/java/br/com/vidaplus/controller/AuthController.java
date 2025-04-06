@@ -12,12 +12,14 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.UserRepository;
+import br.com.vidaplus.service.AuditRecordService;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 
@@ -26,12 +28,14 @@ import io.jsonwebtoken.security.Keys;
 public class AuthController {
 
     private final UserRepository userRepository;
+    private final AuditRecordService auditRecordService;
     private final BCryptPasswordEncoder passwordEncoder;
     private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Deve ser a mesma usada no JwtAuthenticationFilter
 
-    public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, AuditRecordService auditRecordService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.auditRecordService = auditRecordService;
     }
 
     @PostMapping("/login")
@@ -48,10 +52,13 @@ public class AuthController {
         User user = userRepository.findByEmail(email)
             .orElseThrow(() -> new BadCredentialsException("Usuário não encontrado com o email: " + email));
 
-        // Compara a senha (com criptografia)
+        // Compara a senha com criptografia
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Senha incorreta");
         }
+
+        // Registra a ação de login no AuditRecord
+        auditRecordService.logAction(user.getEmail(), "LOGIN");
 
         // Obtém os papéis do usuário e converte para uma lista de strings usando um loop for
         Set<AllRole> userRoles = user.getRoles();
@@ -64,7 +71,7 @@ public class AuthController {
         long expirationTime = 7 * 24 * 60 * 60 * 1000L; // 7 dias em milissegundos
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
-        // Gera o token JWT usando a nova API de assinatura
+        // Gera o token JWT 
         String token = Jwts.builder()
             .setSubject(user.getEmail())
             .setIssuedAt(new Date())
@@ -80,9 +87,31 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout() {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "Logout bem-sucedido.");
-        return ResponseEntity.ok(response);
+    public ResponseEntity<Map<String, String>> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
+        String email = "unknown_user"; // Valor padrão
+
+    if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        String token = authorizationHeader.substring(7);
+        try {
+            String extractedEmail = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+            if (extractedEmail != null) {
+                email = extractedEmail;
+            }
+        } catch (RuntimeException e) {
+            System.out.println("Erro ao decodificar token no logout: " + e.getMessage());
+        }
     }
+
+    auditRecordService.logAction(email, "LOGOUT");
+
+    Map<String, String> response = new HashMap<>();
+    response.put("message", "Logout bem-sucedido.");
+    return ResponseEntity.ok(response);
+}
+
 }
