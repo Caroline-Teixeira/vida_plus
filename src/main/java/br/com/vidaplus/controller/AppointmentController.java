@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.AppointmentDto;
@@ -72,30 +71,12 @@ public class AppointmentController {
     }
 
 // GET consulta do usuário atual
-@GetMapping("/current")
+    @GetMapping("/current")
     public List<Appointment> getCurrentUserAppointments() {
         return appointmentService.getAppointmentsByCurrentUser();
     }
 
-     // GET Agenda do profissional. (TO DO na camada service)
-     @GetMapping("/available/{healthProfessionalId}")
-     public ResponseEntity<List<Appointment>> getAvailableSlots(
-             @PathVariable Long healthProfessionalId,
-             @RequestParam(required = false) String date) {
-         try {
-             List<Appointment> availableSlots = appointmentService.getAvailableSlots(healthProfessionalId, date);
-             if (availableSlots != null) {
-                 return ResponseEntity.ok(availableSlots);
-             } else {
-                 throw new RuntimeException("Nenhum horário disponível encontrado para o profissional com id: " + healthProfessionalId);
-             }
-         } catch (RuntimeException e) {
-             throw new RuntimeException("Erro ao buscar horários disponíveis para o profissional com id " + healthProfessionalId + ": " + e.getMessage());
-         }
-     }
- 
-    
-    // POST agendarconsulta
+    // POST agendar consulta
     @PostMapping
     public ResponseEntity<Appointment> scheduleAppointment(@RequestBody AppointmentDto appointmentDto) {
         try {

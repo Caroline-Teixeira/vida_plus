@@ -262,11 +262,6 @@ public class AppointmentService {
     }
     
 
-    public List<Appointment> getAvailableSlots(Long professionalId, String date) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getAvailableSlots'");
-    }
-
     
 
 }

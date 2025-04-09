@@ -65,11 +65,20 @@ public class UserService {
         return users;
     }
     
-    // Usuário por id
+    // Usuário por id, email e cpf
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
     
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
+    
+    public boolean existsByCpf(String cpf) {
+        return userRepository.existsByCpf(cpf);
+    }
+
+
     // Dados do usuário logado
     public User getCurrentAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -85,7 +94,6 @@ public class UserService {
         return (User) principal;
     }
 
-    
     // Usuário por email
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -141,13 +149,7 @@ public class UserService {
         userRepository.deleteById(id);
     }
     
-    public boolean existsByEmail(String email) {
-        return userRepository.existsByEmail(email);
-    }
     
-    public boolean existsByCpf(String cpf) {
-        return userRepository.existsByCpf(cpf);
-    }
         
 
 }

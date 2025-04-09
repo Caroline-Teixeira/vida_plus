@@ -37,6 +37,10 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/users/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT") // Dados do usuário autenticado
                 .requestMatchers(HttpMethod.GET, "/api/appointments/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/medical-records/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
+                .requestMatchers(HttpMethod.GET, "/api/schedule").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.GET, "/api/schedule/all-slots/{professionalId}/{date}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.POST, "/api/schedule/available-slots").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.POST, "/api/schedule/save").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
                 .requestMatchers("/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
