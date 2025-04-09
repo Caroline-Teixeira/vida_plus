@@ -34,7 +34,7 @@ public class UserController {
     // GET por Lista - todos os usuários
     @GetMapping
     public List<User> getAllUsers() {
-        System.out.println("Método getAllUsers do Controller foi chamado");
+        System.out.println("Método chamando método lista todos os usuários");
         List<User> users = userService.getAllUsers();
         System.out.println("Controller - Usuários retornados: " + users);
         return users;

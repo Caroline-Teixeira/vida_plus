@@ -33,14 +33,13 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))  // Define que a API é stateless (sem sessões)
             .authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(HttpMethod.GET, "/api/audit-records/all").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/audit-records/filter").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/users/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT") // Dados do usuário autenticado
                 .requestMatchers(HttpMethod.GET, "/api/appointments/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/medical-records/current").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL", "PATIENT")
                 .requestMatchers(HttpMethod.GET, "/api/schedule").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.GET, "/api/schedule/all-slots/{professionalId}/{date}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
+                .requestMatchers(HttpMethod.POST, "/api/audit-records/filter").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/schedule/available-slots").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
-                .requestMatchers(HttpMethod.POST, "/api/schedule/save").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers("/auth/**").permitAll()  // Permite acesso público - pagina login (sem autenticação)
                 .requestMatchers("/auth/logout").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
@@ -69,7 +68,7 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // Define o codificador de senhas que será usado para criptografar as senhas dos usuários - hash
+    // Define o codificador de senhas - hash
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

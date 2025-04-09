@@ -3,6 +3,8 @@ package br.com.vidaplus.model;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -23,6 +25,7 @@ import lombok.Data;
 @Entity
 @Table(name = "Appointments")
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Appointment {
 
     @Id
@@ -58,5 +61,10 @@ public class Appointment {
     @JsonSerialize(using = MedicalRecordIdSerializer.class)
     @JsonProperty("medicalRecordId")
     private MedicalRecord medicalRecord;
+
+    @ManyToOne
+    @JoinColumn(name = "schedule_id")
+    @JsonIgnore
+    private ProfessionalSchedule schedule;
 
 }

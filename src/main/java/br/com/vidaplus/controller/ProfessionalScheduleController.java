@@ -2,7 +2,6 @@ package br.com.vidaplus.controller;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.ProfessionalScheduleDto;
 import br.com.vidaplus.model.Appointment;
-import br.com.vidaplus.model.ProfessionalSchedule;
 import br.com.vidaplus.service.ProfessionalScheduleService;
 
 @RestController
@@ -29,7 +27,7 @@ public class ProfessionalScheduleController {
         this.scheduleService = scheduleService;
     }
 
-    // Verifica todos os slots (disponíveis e ocupados) (GET)
+    //GET Verifica todos os slots (disponíveis e ocupados) 
     @GetMapping("/all-slots/{professionalId}/{date}")
     public ResponseEntity<ProfessionalScheduleDto> getAllSlots(
             @PathVariable("professionalId") Long proId,
@@ -43,29 +41,26 @@ public class ProfessionalScheduleController {
         }
     }
 
-    // Verifica os horários disponíveis
+    // POST Verifica os horários disponíveis
     @PostMapping("/available-slots")
-    public ResponseEntity<List<Appointment>> getAvailableSlots(@RequestBody Map<String, String> request) {
-        Long proId = Long.valueOf(request.get("professionalId"));
-        LocalDate date = LocalDate.parse(request.get("date"));
-        List<Appointment> freeAppointments = scheduleService.getAvailableSlots(proId, date);
-        return ResponseEntity.ok(freeAppointments);
+    public ResponseEntity<ProfessionalScheduleDto> getAvailableSlots(@RequestBody ProfessionalScheduleDto request) {
+        try {
+            Long proId = request.getHealthProfessionalId();
+            LocalDate date = request.getDate();
+            List<Appointment> freeAppointments = scheduleService.getAvailableSlots(proId, date);
+
+            ProfessionalScheduleDto response = new ProfessionalScheduleDto();
+            response.setHealthProfessionalId(proId);
+            response.setDate(date);
+            response.setAvailableSlots(freeAppointments);
+            response.setBookedSlots(null); // Não buscamos os slots ocupados neste endpoint
+            
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar slots disponíveis: " + e.getMessage());
+        }
     }
 
-    // Cria ou atualiza a agenda do profissional
-    @PostMapping("/save")
-    public ResponseEntity<ProfessionalScheduleDto> saveSchedule(@RequestBody ProfessionalScheduleDto dto) {
-        ProfessionalSchedule schedule = scheduleService.saveSchedule(
-            dto.getHealthProfessionalId(),
-            dto.getDate()
-        );
-
-        ProfessionalScheduleDto response = new ProfessionalScheduleDto();
-        response.setId(schedule.getId());
-        response.setHealthProfessionalId(schedule.getHealthProfessional().getId());
-        response.setDate(schedule.getDate());
-        response.setAvailableSlots(scheduleService.getAvailableSlots(schedule.getHealthProfessional().getId(), schedule.getDate()));
-
-        return ResponseEntity.ok(response);
-    }
+    
 }
