@@ -25,14 +25,17 @@ public class ProfessionalScheduleService {
     private final ProfessionalScheduleRepository scheduleRepository; 
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final UserService userService;
 
     @Autowired
     public ProfessionalScheduleService(ProfessionalScheduleRepository scheduleRepository,
                                        UserRepository userRepository,
-                                       AppointmentRepository appointmentRepository) {
+                                       AppointmentRepository appointmentRepository,
+                                       UserService userService) {
         this.scheduleRepository = scheduleRepository;
         this.userRepository = userRepository;
         this.appointmentRepository = appointmentRepository;
+        this.userService = userService;
     }
 
     // Verifica os horários disponíveis e agendados
@@ -85,7 +88,7 @@ public class ProfessionalScheduleService {
         return freeAppointments;
     }
 
-    // Verifica todos os slots (disponíveis e ocupados) do profissional para uma data (08:00 a 18:00)
+    // Verifica todos os slots (disponíveis e ocupados)
     @Transactional(readOnly = true)
     public ProfessionalScheduleDto getAllSlots(Long proId, LocalDate date) {
         // Valida os parâmetros
@@ -147,5 +150,35 @@ public class ProfessionalScheduleService {
         return response;
     }
 
+    // Verifica a agenda do usuário TUAL
+    @Transactional(readOnly = true)
+    public ProfessionalScheduleDto getCurrentUserSchedule(LocalDate date) {
+        try {
+            // Obtém o usuário autenticado
+            User currentUser = userService.getCurrentAuthenticatedUser();
+
+            // Usa o ID do usuário autenticado para buscar a agenda
+            Long proId = currentUser.getId();
+            return getAllSlots(proId, date);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar a agenda do usuário atual: " + e.getMessage());
+        }
+    }
+
+    // Busca as consultas agendadas do usuário logado
+    @Transactional(readOnly = true)
+    public List<Appointment> getMyBookedAppointments() {
+        try {
+            // Obtém o usuário autenticado
+            User currentUser = userService.getCurrentAuthenticatedUser();
+
+            // Busca as consultas onde o usuário autenticado é o profissional de saúde
+            List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessional(currentUser);
+
+            return bookedAppointments;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar as consultas agendadas do usuário atual: " + e.getMessage());
+        }
+    }
     
 }

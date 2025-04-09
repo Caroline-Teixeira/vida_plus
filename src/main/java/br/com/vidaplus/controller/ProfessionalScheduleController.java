@@ -41,6 +41,19 @@ public class ProfessionalScheduleController {
         }
     }
 
+    //GET Verifica os slots ocupados do usuário atual
+    @GetMapping("/current/{date}")
+    public ResponseEntity<ProfessionalScheduleDto> getCurrentUserSchedule(@PathVariable("date") String date) {
+        try {
+            LocalDate parsedDate = LocalDate.parse(date);
+            ProfessionalScheduleDto response = scheduleService.getCurrentUserSchedule(parsedDate);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao buscar a agenda do usuário atual: " + e.getMessage());
+        }
+    }
+    
+
     // POST Verifica os horários disponíveis
     @PostMapping("/available-slots")
     public ResponseEntity<ProfessionalScheduleDto> getAvailableSlots(@RequestBody ProfessionalScheduleDto request) {
