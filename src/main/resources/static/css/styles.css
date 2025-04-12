@@ -1,0 +1,167 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+    position: relative;
+    max-height: 80vh; /* Limita a altura do contêiner para evitar overflow */
+    overflow-y: auto; /* Adiciona barra de rolagem ao contêiner, se necessário */
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+    position: relative; /* Garante que o título não seja sobreposto */
+    z-index: 1; /* Mantém o título acima de outros elementos */
+}
+
+h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+    text-align: left;
+}
+
+h3 {
+    font-size: 18px;
+    color: #555;
+    margin-bottom: 10px;
+    margin-top: 20px;
+}
+
+/* Estilos para as abas */
+.tabs {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background: white;
+    width: 100%;
+    /* Removemos position: sticky para evitar sobreposição */
+}
+
+.tab-button {
+    flex: 1;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    padding: 10px 20px;
+    transition: 0.3s;
+    font-size: 16px;
+    margin-right: 5px;
+}
+
+.tab-button:last-child {
+    margin-right: 0;
+}
+
+.tab-button:hover {
+    background-color: #94a3fa67;
+}
+
+.tab-button.active {
+    background-color: #625ff79a;
+    font-weight: bold;
+    color: #fff;
+}
+
+.tab-content {
+    display: none;
+    padding: 10px;
+    text-align: left;
+    overflow: visible;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Estilos para a lista de consultas */
+#appointmentsList {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para a lista de consultas associadas no prontuário */
+#medicalRecordAppointments {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+/* Estilos para a lista de observações no prontuário */
+#medicalRecordObservations {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
+}
+
+.appointment-item,
+.observation-item {
+    border-bottom: 1px solid #eee;
+    padding: 8px 0;
+}
+
+.appointment-item:last-child,
+.observation-item:last-child {
+    border-bottom: none;
+}
+
+.appointment-item p,
+.observation-item p {
+    margin: 3px 0;
+    font-size: 14px;
+    color: #333;
+    line-height: 1.4;
+}
+
+.logout-button {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+    width: 100%;
+    font-size: 16px;
+}
+
+.logout-button:hover {
+    background-color: #e60000;
+}
+
+/* Garante que as abas apareçam em todas as páginas */
+#prontuario .tabs,
+#consultas .tabs,
+#meus-dados .tabs {
+    display: flex !important;
+}

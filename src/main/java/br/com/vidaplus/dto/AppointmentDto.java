@@ -16,6 +16,8 @@ public class AppointmentDto {
     private String reason;
     private Long medicalRecordId;
     private String observations;
+    private String patientName;
+    private String healthProfessionalName;
 
     // Getters e Setters
 
@@ -75,6 +77,19 @@ public class AppointmentDto {
 
     public void setMedicalRecordId(Long medicalRecordId) {
         this.medicalRecordId = medicalRecordId;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+    public String getHealthProfessionalName() {
+        return healthProfessionalName;
+    }
+    public void setHealthProfessionalName(String healthProfessionalName) {
+        this.healthProfessionalName = healthProfessionalName;
     }
 
 }

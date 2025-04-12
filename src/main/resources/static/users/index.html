@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital VidaPlus</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Hospital VidaPlus</h1>
+
+        <!-- Sistema de abas -->
+        <div class="tabs">
+            <button class="tab-button active" onclick="openTab(event, 'meus-dados')">Meus Dados</button>
+            <button class="tab-button" onclick="openTab(event, 'consultas')">Consultas</button>
+            <button class="tab-button" onclick="openTab(event, 'prontuario')">Prontuário</button>
+        </div>
+
+        <!-- Aba Meus Dados -->
+        <div id="meus-dados" class="tab-content active">
+            <h2>Meus Dados</h2>
+            <p><strong>Nome:</strong> <span id="currentUserName">N/A</span></p>
+            <p><strong>CPF:</strong> <span id="currentUserCpf">N/A</span></p>
+            <p><strong>E-mail:</strong> <span id="currentUserEmail">N/A</span></p>
+            <p><strong>Contato:</strong> <span id="currentUserContact">N/A</span></p>
+            <p><strong>Data de Nascimento:</strong> <span id="currentUserDateOfBirth">N/A</span></p>
+            <p><strong>Gênero:</strong> <span id="currentUserGender">N/A</span></p>
+            <p><strong>Perfil:</strong> <span id="currentUserRoles">N/A</span></p>
+        </div>
+
+        <!-- Aba de Consultas -->
+        <div id="consultas" class="tab-content">
+            <h2>Consultas</h2>
+            <div id="appointmentsList"></div>
+        </div>
+
+        <!-- Aba Prontuário -->
+        <div id="prontuario" class="tab-content">
+            <h2>Prontuário</h2>
+            <p><strong>Paciente:</strong> <span id="medicalRecordPatient">Carregando...</span></p>
+            <p><strong>Data de Criação:</strong> <span id="medicalRecordDate">Carregando...</span></p>
+            <h3>Consultas Associadas</h3>
+            <div id="medicalRecordAppointments">Carregando consultas...</div>
+            <h3>Observações</h3>
+            <div id="medicalRecordObservations">Carregando observações...</div>
+        </div>
+
+        <!-- Botão de logout -->
+        <button id="logoutButton" class="logout-button">Sair</button>
+    </div>
+    <script src="/js/scripts.js"></script>
+</body>
+</html>

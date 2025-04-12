@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import br.com.vidaplus.serializer.MedicalRecordIdSerializer;
-import br.com.vidaplus.serializer.UserIdSerializer;
+import br.com.vidaplus.serializer.UserWithNameSerializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -34,13 +34,13 @@ public class Appointment {
 
     @ManyToOne
     @JoinColumn(name = "patient_id")
-    @JsonSerialize(using = UserIdSerializer.class)
+    @JsonSerialize(using = UserWithNameSerializer.class)
     @JsonProperty("patientId")
     private User patient;
 
     @ManyToOne
     @JoinColumn(name = "health_professional_id")
-    @JsonSerialize(using = UserIdSerializer.class)
+    @JsonSerialize(using = UserWithNameSerializer.class)
     @JsonProperty("healthProfessionalId")
     private User healthProfessional;
 
