@@ -1,167 +1,244 @@
 body {
     font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
     background-color: #f4f4f4;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+}
+
+header {
+    background-color: #625ff79a;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+}
+
+header h1 {
     margin: 0;
 }
 
-.container {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 400px;
-    text-align: center;
-    position: relative;
-    max-height: 80vh; /* Limita a altura do contêiner para evitar overflow */
-    overflow-y: auto; /* Adiciona barra de rolagem ao contêiner, se necessário */
-}
-
-h1 {
-    margin-bottom: 20px;
-    font-size: 24px;
-    color: #333;
-    position: relative; /* Garante que o título não seja sobreposto */
-    z-index: 1; /* Mantém o título acima de outros elementos */
-}
-
-h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 20px;
-    color: #333;
-    text-align: left;
-}
-
-h3 {
-    font-size: 18px;
-    color: #555;
-    margin-bottom: 10px;
-    margin-top: 20px;
-}
-
-/* Estilos para as abas */
-.tabs {
+nav ul.tabs {
+    list-style: none;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    background: white;
-    width: 100%;
-    /* Removemos position: sticky para evitar sobreposição */
-}
-
-.tab-button {
-    flex: 1;
-    background-color: #f1f1f1;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    outline: none;
-    cursor: pointer;
-    padding: 10px 20px;
-    transition: 0.3s;
-    font-size: 16px;
-    margin-right: 5px;
-}
-
-.tab-button:last-child {
-    margin-right: 0;
-}
-
-.tab-button:hover {
+    justify-content: center;
     background-color: #94a3fa67;
 }
 
-.tab-button.active {
+nav ul.tabs li {
+    margin: 0 5px;
+}
+
+nav ul.tabs li a {
+    display: block;
+    padding: 10px 20px;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+nav ul.tabs li a.active {
     background-color: #625ff79a;
-    font-weight: bold;
-    color: #fff;
+}
+
+nav ul.tabs li a:hover {
+    background-color: #94a3fa67;
+}
+
+main {
+    padding: 20px;
 }
 
 .tab-content {
     display: none;
-    padding: 10px;
-    text-align: left;
-    overflow: visible;
 }
 
 .tab-content.active {
     display: block;
 }
 
-/* Estilos para a lista de consultas */
-#appointmentsList {
-    max-height: 120px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-}
-
-/* Estilos para a lista de consultas associadas no prontuário */
-#medicalRecordAppointments {
-    max-height: 120px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-}
-
-/* Estilos para a lista de observações no prontuário */
-#medicalRecordObservations {
-    max-height: 120px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 4px;
-    background-color: #f9f9f9;
-    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.05);
-}
-
-.appointment-item,
-.observation-item {
-    border-bottom: 1px solid #eee;
-    padding: 8px 0;
-}
-
-.appointment-item:last-child,
-.observation-item:last-child {
-    border-bottom: none;
-}
-
-.appointment-item p,
-.observation-item p {
-    margin: 3px 0;
-    font-size: 14px;
+.tab-content h2 {
     color: #333;
-    line-height: 1.4;
 }
 
-.logout-button {
-    background-color: #ff4d4d;
+.logout-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background-color: #e63946;
     color: white;
-    padding: 10px 20px;
+    padding: 8px 16px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    margin-top: 20px;
+}
+
+.logout-btn:hover {
+    background-color: #d62828;
+}
+
+/* Estilos para a Aba Gerenciar Usuários */
+.manage-users-actions {
+    margin-bottom: 20px;
+}
+
+.manage-users-actions button {
+    background-color: #625ff79a;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.manage-users-actions button:hover {
+    background-color: #94a3fa67;
+}
+
+.user-form, .user-list, .user-search {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.user-form label, .user-search label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: normal;
+}
+
+.user-form input, .user-form select, .user-search input {
     width: 100%;
-    font-size: 16px;
+    padding: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
 }
 
-.logout-button:hover {
-    background-color: #e60000;
+/* Estilo melhorado para o grupo de checkboxes */
+.checkbox-group {
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px 15px;
+    background-color: #f9f9f9;
 }
 
-/* Garante que as abas apareçam em todas as páginas */
-#prontuario .tabs,
-#consultas .tabs,
-#meus-dados .tabs {
-    display: flex !important;
+/* Estilo para cada item de checkbox */
+.checkbox-group label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 5px 0;
+}
+
+.checkbox-group label:last-child {
+    margin-bottom: 0;
+}
+
+/* Estilo para o input checkbox */
+.checkbox-group input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #625ff7;
+    border-radius: 4px;
+    margin-right: 10px;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+}
+
+/* Estilo para o checkbox quando marcado */
+.checkbox-group input[type="checkbox"]:checked {
+    background-color: #625ff7;
+}
+
+/* Criar o símbolo de verificação (checkmark) */
+.checkbox-group input[type="checkbox"]:checked::after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Efeito hover para melhorar a interatividade */
+.checkbox-group label:hover {
+    background-color: rgba(148, 163, 250, 0.1);
+    border-radius: 4px;
+}
+
+/* Estilo para o texto do label */
+.checkbox-group label span {
+    font-size: 14px;
+    color: #333;
+}
+
+.user-form button, .user-search button {
+    background-color: #625ff79a;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.user-form button:hover, .user-search button:hover {
+    background-color: #94a3fa67;
+}
+
+.user-list .user-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-list .user-item button {
+    background-color: #e63946;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.user-list .user-item button.edit {
+    background-color: #625ff79a;
+    margin-right: 5px;
+}
+
+.user-list .user-item button:hover {
+    opacity: 0.8;
+}
+
+.message-box {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.message-box.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.message-box.error {
+    background-color: #f8d7da;
+    color: #721c24;
 }

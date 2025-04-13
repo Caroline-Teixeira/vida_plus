@@ -1,10 +1,6 @@
 package br.com.vidaplus.serializer;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -13,22 +9,31 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 public class ObservationsSerializer extends JsonSerializer<String> {
 
     @Override
-    public void serialize(String observations, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-        List<Map<String, String>> observationsList = new ArrayList<>();
-        if (observations != null && !observations.trim().isEmpty()) {
-            String[] entries = observations.split(" \\|\\| ");
-            for (String entry : entries) {
-                String[] parts = entry.split(" \\| ");
-                if (parts.length >= 2) {
-                    String dateTime = parts[0].trim();
-                    String text = parts[1].trim();
-                    Map<String, String> observationMap = new HashMap<>();
-                    observationMap.put("dateTime", dateTime);
-                    observationMap.put("text", text);
-                    observationsList.add(observationMap);
-                }
-            }
+    public void serialize(String observations, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+        if (observations == null || observations.trim().isEmpty()) {
+            jsonGenerator.writeStartArray();
+            jsonGenerator.writeEndArray();
+            return;
         }
-        gen.writeObject(observationsList);
+
+        jsonGenerator.writeStartArray();
+        String[] observationEntries = observations.split(" \\|\\| ");
+        for (String entry : observationEntries) {
+            String[] parts = entry.split(" \\| ", 3);
+            if (parts.length < 3) {
+                continue; // Ignora entradas mal formatadas
+            }
+
+            String appointmentId = parts[0].trim();
+            String dateTimeStr = parts[1].trim();
+            String observationText = parts[2].trim();
+
+            jsonGenerator.writeStartObject();
+            jsonGenerator.writeStringField("appointmentId", appointmentId);
+            jsonGenerator.writeStringField("dateTime", dateTimeStr);
+            jsonGenerator.writeStringField("text", observationText);
+            jsonGenerator.writeEndObject();
+        }
+        jsonGenerator.writeEndArray();
     }
 }

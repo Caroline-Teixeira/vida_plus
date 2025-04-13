@@ -7,48 +7,147 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <div class="container">
+    <header>
         <h1>Hospital VidaPlus</h1>
+        <nav>
+            <ul class="tabs">
+                <li><a href="#" class="tab-button active" data-tab="meus-dados">Meus Dados</a></li>
+                <li><a href="#" class="tab-button" data-tab="consultas">Consultas</a></li>
+                <li><a href="#" class="tab-button" data-tab="prontuario">Prontuário</a></li>
+                <li id="manageUsersTab" style="display: none;"><a href="#" class="tab-button" data-tab="gerenciar-usuarios">Gerenciar Usuários</a></li>
+            </ul>
+        </nav>
+        <button id="logoutButton" class="logout-btn">Sair</button>
+    </header>
 
-        <!-- Sistema de abas -->
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab(event, 'meus-dados')">Meus Dados</button>
-            <button class="tab-button" onclick="openTab(event, 'consultas')">Consultas</button>
-            <button class="tab-button" onclick="openTab(event, 'prontuario')">Prontuário</button>
-        </div>
+    <main>
+        <!-- Mensagem de Erro/Sucesso -->
+        <div id="messageBox" class="message-box" style="display: none;"></div>
 
         <!-- Aba Meus Dados -->
         <div id="meus-dados" class="tab-content active">
-            <h2>Meus Dados</h2>
-            <p><strong>Nome:</strong> <span id="currentUserName">N/A</span></p>
-            <p><strong>CPF:</strong> <span id="currentUserCpf">N/A</span></p>
-            <p><strong>E-mail:</strong> <span id="currentUserEmail">N/A</span></p>
-            <p><strong>Contato:</strong> <span id="currentUserContact">N/A</span></p>
-            <p><strong>Data de Nascimento:</strong> <span id="currentUserDateOfBirth">N/A</span></p>
-            <p><strong>Gênero:</strong> <span id="currentUserGender">N/A</span></p>
-            <p><strong>Perfil:</strong> <span id="currentUserRoles">N/A</span></p>
+            <div class="section-title">
+                <h2>Meus Dados</h2>
+            </div>
+            <div id="userData" class="prontuario-info">
+                <p><strong>Nome:</strong> <span id="currentUserName">Carregando...</span></p>
+                <p><strong>CPF:</strong> <span id="currentUserCpf">Carregando...</span></p>
+                <p><strong>E-mail:</strong> <span id="currentUserEmail">Carregando...</span></p>
+                <p><strong>Contato:</strong> <span id="currentUserContact">Carregando...</span></p>
+                <p><strong>Data de Nascimento:</strong> <span id="currentUserDateOfBirth">Carregando...</span></p>
+                <p><strong>Gênero:</strong> <span id="currentUserGender">Carregando...</span></p>
+                <p><strong>Perfil:</strong> <span id="currentUserRoles">Carregando...</span></p>
+            </div>
         </div>
 
-        <!-- Aba de Consultas -->
+        <!-- Aba Consultas -->
         <div id="consultas" class="tab-content">
-            <h2>Consultas</h2>
-            <div id="appointmentsList"></div>
+            <div class="section-title">
+                <h2>Consultas</h2>
+            </div>
+            
+            <div class="scrollable-container">
+                <div id="appointmentsList">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
         </div>
 
         <!-- Aba Prontuário -->
         <div id="prontuario" class="tab-content">
-            <h2>Prontuário</h2>
-            <p><strong>Paciente:</strong> <span id="medicalRecordPatient">Carregando...</span></p>
-            <p><strong>Data de Criação:</strong> <span id="medicalRecordDate">Carregando...</span></p>
-            <h3>Consultas Associadas</h3>
-            <div id="medicalRecordAppointments">Carregando consultas...</div>
-            <h3>Observações</h3>
-            <div id="medicalRecordObservations">Carregando observações...</div>
+            <div class="section-title">
+                <h2>Prontuário</h2>
+            </div>
+            
+            <div class="prontuario-info">
+                <span class="patient-label" id="medicalRecordPatient">Carregando...</span>
+                <p><strong>Data de Criação:</strong> <span id="medicalRecordDate">Carregando...</span></p>
+            </div>
+            
+            <div class="section-title">
+                <h3>Consultas Associadas</h3>
+            </div>
+            
+            <div class="scrollable-container">
+                <div id="medicalRecordAppointments">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
+            
+            <div class="section-title">
+                <h3>Observações</h3>
+            </div>
+            
+            <div class="scrollable-container observacoes-container">
+                <div id="medicalRecordObservations">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
         </div>
 
-        <!-- Botão de logout -->
-        <button id="logoutButton" class="logout-button">Sair</button>
-    </div>
-    <script src="/js/scripts.js"></script>
+        <!-- Aba Gerenciar Usuários (Visível apenas para ADMIN e ATTENDANT) -->
+        <div id="gerenciar-usuarios" class="tab-content">
+            <div class="section-title">
+                <h2>Gerenciar Usuários</h2>
+            </div>
+
+            <!-- Botão para alternar entre modos -->
+            <div class="manage-users-actions">
+                <button id="toggleModeButton" onclick="toggleMode()">Cadastrar Usuário</button>
+            </div>
+
+            <!-- Formulário para Cadastrar Usuário (inicialmente oculto) -->
+            <div class="user-form" id="userFormContainer" style="display: none;">
+                <h3>Cadastrar Usuário</h3>
+                <form id="userForm">
+                    <input type="hidden" id="userId">
+                    <label for="userName">Nome:</label>
+                    <input type="text" id="userName" placeholder="Nome completo" required>
+                    <label for="userCpf">CPF:</label>
+                    <input type="text" id="userCpf" placeholder="123.456.789-00" required>
+                    <label for="userEmail">E-mail:</label>
+                    <input type="email" id="userEmail" placeholder="exemplo@dominio.com" required>
+                    <label for="userPassword">Senha:</label>
+                    <input type="password" id="userPassword" placeholder="Digite uma senha">
+                    <label for="userContact">Contato:</label>
+                    <input type="text" id="userContact" placeholder="(11) 91234-5678" required>
+                    <label for="userDateOfBirth">Data de Nascimento:</label>
+                    <input type="date" id="userDateOfBirth" required>
+                    <label for="userGender">Gênero:</label>
+                    <select id="userGender" required>
+                        <option value="MALE">Masculino</option>
+                        <option value="FEMALE">Feminino</option>
+                    </select>
+                    <label>Perfil:</label>
+                    <div class="checkbox-group" id="userRoles">
+                        <label><input type="checkbox" name="roles" value="PATIENT"> Paciente</label>
+                        <label><input type="checkbox" name="roles" value="HEALTH_PROFESSIONAL"> Profissional de Saúde</label>
+                        <label><input type="checkbox" name="roles" value="ATTENDANT"> Atendente</label>
+                        <label><input type="checkbox" name="roles" value="ADMIN"> Administrador</label>
+                    </div>
+                    <button type="button" onclick="saveUser()">Salvar</button>
+                    <button type="button" onclick="clearUserForm()">Limpar</button>
+                </form>
+            </div>
+
+            <!-- Lista de Usuários -->
+            <div class="user-list" id="usersListContainer">
+                <h3>Lista de Usuários</h3>
+                <div id="usersList">Carregando usuários...</div>
+            </div>
+
+            <!-- Busca de Usuário por ID -->
+            <div class="user-search" id="userSearchContainer">
+                <h3>Buscar Usuário por ID</h3>
+                <input type="number" id="searchUserId" placeholder="Digite o ID do usuário">
+                <button onclick="searchUserById()">Buscar</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript para renderizar consultas dinamicamente -->
+    <script src="/js/utils.js"></script>
+    <script src="/js/main.js"></script>
+    
 </body>
 </html>

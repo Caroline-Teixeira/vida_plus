@@ -76,9 +76,9 @@ public class MedicalRecordService {
             return;
         }
 
-        // Formata a observação com data e texto
+        // Formata a observação com appointmentId, data e texto
         String dateTime = appointment.getDateTime().format(DATE_TIME_FORMATTER);
-        String formattedObservation = dateTime + " | " + observations;
+        String formattedObservation = appointment.getId() + " | " + dateTime + " | " + observations;
 
         // Adiciona a nova observação às existentes
         String currentObservations = medicalRecord.getObservations();
@@ -93,24 +93,74 @@ public class MedicalRecordService {
     }
 
     // Atualiza as observações de um prontuário
+    @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
     public void updateObservations(MedicalRecord medicalRecord, List<Long> appointmentIds, String newObservations) {
         // Verifica se as observações são válidas
         if (newObservations == null || newObservations.trim().isEmpty()) {
             throw new IllegalArgumentException("Observações não podem ser vazias.");
         }
 
-        // Usa a data atual para a nova observação
-        String dateTime = LocalDateTime.now().format(DATE_TIME_FORMATTER);
-        String formattedObservation = dateTime + " | " + newObservations;
-
-        // Adiciona novas observações ao prontuário
-        String currentObservations = medicalRecord.getObservations();
-        if (currentObservations == null || currentObservations.trim().isEmpty()) {
-            medicalRecord.setObservations(formattedObservation);
-        } else {
-            medicalRecord.setObservations(currentObservations + " || " + formattedObservation);
+        // Verifica se há appointmentIds válidos
+        if (appointmentIds == null || appointmentIds.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum ID de consulta fornecido.");
         }
 
+        // Usa a data atual para a nova observação
+        String dateTime = LocalDateTime.now().format(DATE_TIME_FORMATTER);
+
+        // Obtém as observações existentes
+        String currentObservations = medicalRecord.getObservations();
+        List<String> updatedEntries = new ArrayList<>();
+
+        if (currentObservations == null || currentObservations.trim().isEmpty()) {
+            // Se não houver observações existentes, cria uma nova entrada para cada appointmentId
+            for (Long appointmentId : appointmentIds) {
+                String formattedObservation = appointmentId + " | " + dateTime + " | " + newObservations;
+                updatedEntries.add(formattedObservation);
+            }
+        } else {
+            // Divide as observações existentes em entradas
+            String[] observationEntries = currentObservations.split(" \\|\\| ");
+            boolean updated = false;
+
+            // Itera sobre as entradas existentes
+            for (String entry : observationEntries) {
+                String[] parts = entry.split(" \\| ", 3);
+                if (parts.length < 3) {
+                    continue; // Ignora entradas mal formatadas
+                }
+
+                Long entryAppointmentId;
+                try {
+                    entryAppointmentId = Long.parseLong(parts[0].trim());
+                } catch (NumberFormatException e) {
+                    updatedEntries.add(entry); // Mantém entradas mal formatadas
+                    continue;
+                }
+
+                // Verifica se a entrada corresponde a um dos appointmentIds fornecidos
+                if (appointmentIds.contains(entryAppointmentId)) {
+                    // Atualiza a observação para este appointmentId
+                    String formattedObservation = entryAppointmentId + " | " + dateTime + " | " + newObservations;
+                    updatedEntries.add(formattedObservation);
+                    updated = true;
+                } else {
+                    // Mantém a observação existente
+                    updatedEntries.add(entry);
+                }
+            }
+
+            // Se não encontrou uma entrada para algum appointmentId, adiciona uma nova
+            if (!updated) {
+                for (Long appointmentId : appointmentIds) {
+                    String formattedObservation = appointmentId + " | " + dateTime + " | " + newObservations;
+                    updatedEntries.add(formattedObservation);
+                }
+            }
+        }
+
+        // Atualiza as observações do prontuário com as entradas atualizadas
+        medicalRecord.setObservations(String.join(" || ", updatedEntries));
         medicalRecordRepository.save(medicalRecord);
     }
 
@@ -138,12 +188,12 @@ public class MedicalRecordService {
         // Itera sobre as entradas de observação
         for (String entry : observationEntries) {
             // Extrai a data da entrada
-            String[] parts = entry.split(" \\| ");
-            if (parts.length < 2) {
+            String[] parts = entry.split(" \\| ", 3);
+            if (parts.length < 3) {
                 continue; // Ignora entradas mal formatadas
             }
 
-            String dateString = parts[0].trim();
+            String dateString = parts[1].trim(); // A data está na segunda posição agora
             try {
                 LocalDateTime observationDate = LocalDateTime.parse(dateString, DATE_TIME_FORMATTER);
                 // Verifica se a data está dentro do intervalo
