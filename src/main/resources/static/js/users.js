@@ -1,4 +1,4 @@
-// main.js
+// users.js
 
 // Variáveis globais para armazenar o ID, nome e papéis do usuário atual
 let currentUserId = null;
@@ -9,9 +9,9 @@ let isRegisterMode = false; // Controla o modo (cadastro ou gerenciamento)
 // Função para obter o token
 function getToken() {
     const token = localStorage.getItem("hospital-token");
-    console.log("[Main] Token recuperado do localStorage:", token);
+    console.log("[Users] Token recuperado do localStorage:", token);
     if (!token) {
-        console.error("[Main] Nenhum token encontrado no localStorage.");
+        console.error("[Users] Nenhum token encontrado no localStorage.");
         throw new Error("Nenhum token encontrado.");
     }
     return token;
@@ -24,57 +24,55 @@ async function fetchApi(url, method = "GET", body = null, requiresAuth = true) {
     if (requiresAuth) {
         const token = getToken();
         headers["Authorization"] = `Bearer ${token.trim()}`;
-        console.log("[Main] Cabeçalho Authorization:", headers.Authorization);
+        console.log("[Users] Cabeçalho Authorization:", headers.Authorization);
     }
 
     const options = { method, headers };
     if (body) options.body = JSON.stringify(body);
 
-    console.log(`[Main] Enviando requisição para ${url} com método ${method}`);
-    console.log("[Main] Corpo da requisição:", body);
+    console.log(`[Users] Enviando requisição para ${url} com método ${method}`);
+    console.log("[Users] Corpo da requisição:", body);
     const response = await fetch(url, options);
-    console.log(`[Main] Resposta de ${url}: Status ${response.status}`);
+    console.log(`[Users] Resposta de ${url}: Status ${response.status}`);
+
     if (!response.ok) {
         const errorText = await response.text();
-        console.error("[Main] Detalhes do erro:", errorText);
-        if (requiresAuth && (response.status === 401 || response.status === 403)) {
-            console.error("[Main] Erro de autenticação. Token inválido ou expirado.");
-            localStorage.removeItem("hospital-token");
-            throw new Error("Erro de autenticação. Faça login novamente.");
-        }
+        console.error("[Users] Detalhes do erro:", errorText);
+        // Não tratamos 401/403 aqui, deixamos a função chamadora decidir
         throw new Error(`Erro ${response.status}: ${errorText || response.statusText}`);
     }
+
     const data = await response.json();
-    console.log("[Main] Dados recebidos:", JSON.stringify(data, null, 2));
+    console.log("[Users] Dados recebidos:", JSON.stringify(data, null, 2));
     return data;
 }
 
 // Função para logout
 async function logout() {
-    console.log("[Main] Iniciando logout...");
+    console.log("[Users] Iniciando logout...");
     try {
         await fetchApi("/auth/logout", "POST", null, true);
         localStorage.removeItem("hospital-token");
-        console.log("[Main] Token removido do localStorage.");
+        console.log("[Users] Token removido do localStorage.");
         window.location.href = "/auth/login.html";
     } catch (error) {
-        console.error("[Main] Erro ao fazer logout:", error.message);
+        console.error("[Users] Erro ao fazer logout:", error.message);
         showMessage("Erro ao fazer logout: " + error.message, 'error');
     }
 }
 
 // Função para carregar os dados do usuário autenticado
 async function loadCurrentUser() {
-    console.log("[Main] Iniciando carregamento dos dados do usuário...");
+    console.log("[Users] Iniciando carregamento dos dados do usuário...");
     try {
         const user = await fetchApi("/api/users/current", "GET", null, true);
-        console.log("[Main] Dados completos do usuário:", JSON.stringify(user, null, 2));
-        console.log("[Main] Papéis do usuário (user.roles):", user.roles);
+        console.log("[Users] Dados completos do usuário:", JSON.stringify(user, null, 2));
+        console.log("[Users] Papéis do usuário (user.roles):", user.roles);
 
         currentUserId = user.id;
         currentUserName = user.name;
         userRoles = user.roles.map(role => role.name);
-        console.log("[Main] Usuário atual - ID:", currentUserId, "Nome:", currentUserName, "Papéis:", userRoles);
+        console.log("[Users] Usuário atual - ID:", currentUserId, "Nome:", currentUserName, "Papéis:", userRoles);
 
         document.getElementById("currentUserName").textContent = user.name || "N/A";
         document.getElementById("currentUserCpf").textContent = user.cpf || "N/A";
@@ -83,9 +81,9 @@ async function loadCurrentUser() {
         document.getElementById("currentUserDateOfBirth").textContent = user.dateOfBirth || "N/A";
         document.getElementById("currentUserGender").textContent = user.gender === "MALE" ? "Masculino" : user.gender === "FEMALE" ? "Feminino" : "N/A";
         const translatedRoles = user.roles.map(role => {
-            console.log("[Main] Processando papel:", role);
+            console.log("[Users] Processando papel:", role);
             const translatedRole = roleTranslations[role.name] || role.name;
-            console.log("[Main] Papel traduzido:", translatedRole);
+            console.log("[Users] Papel traduzido:", translatedRole);
             return translatedRole;
         }).join(", ");
         document.getElementById("currentUserRoles").textContent = translatedRoles || "N/A";
@@ -95,128 +93,7 @@ async function loadCurrentUser() {
             loadUsers();
         }
     } catch (error) {
-        console.error("[Main] Erro ao carregar usuário:", error.message);
-        showMessage(error.message, 'error');
-        setTimeout(() => {
-            window.location.href = "/auth/login.html";
-        }, 3000);
-    }
-}
-
-// Função para carregar as consultas do usuário atual
-async function loadAppointments() {
-    console.log("[Main] Iniciando carregamento das consultas...");
-    try {
-        const appointments = await fetchApi("/api/appointments/current", "GET", null, true);
-        console.log("[Main] Consultas recebidas:", JSON.stringify(appointments, null, 2));
-
-        const appointmentsList = document.getElementById("appointmentsList");
-        appointmentsList.innerHTML = "";
-
-        if (appointments.length === 0) {
-            appointmentsList.innerHTML = "<p>Nenhuma consulta encontrada.</p>";
-            return;
-        }
-
-        for (const appointment of appointments) {
-            const patientDisplay = appointment.patientId && appointment.patientId.name 
-                ? appointment.patientId.name 
-                : `Paciente (ID: ${appointment.patientId?.id || 'Desconhecido'})`;
-            const healthProfessionalDisplay = appointment.healthProfessionalId && appointment.healthProfessionalId.name 
-                ? appointment.healthProfessionalId.name 
-                : `Profissional de Saúde (ID: ${appointment.healthProfessionalId?.id || 'Desconhecido'})`;
-
-            const dateTime = new Date(appointment.dateTime);
-            const formattedDateTime = `${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth() + 1).toString().padStart(2, '0')}/${dateTime.getFullYear()} ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
-
-            const appointmentItem = document.createElement("div");
-            appointmentItem.classList.add("appointment-item");
-            appointmentItem.innerHTML = `
-                <p><strong>Data e Hora:</strong> ${formattedDateTime}</p>
-                <p><strong>Tipo:</strong> ${appointmentTypeTranslations[appointment.type] || appointment.type}</p>
-                <p><strong>Status:</strong> ${appointmentStatusTranslations[appointment.status] || appointment.status}</p>
-                <p><strong>Motivo:</strong> ${appointment.reason || "N/A"}</p>
-                <p><strong>Paciente:</strong> ${patientDisplay}</p>
-                <p><strong>Profissional de Saúde:</strong> ${healthProfessionalDisplay}</p>
-            `;
-            appointmentsList.appendChild(appointmentItem);
-        }
-    } catch (error) {
-        console.error("[Main] Erro ao carregar consultas:", error.message);
-        showMessage(error.message, 'error');
-        setTimeout(() => {
-            window.location.href = "/auth/login.html";
-        }, 3000);
-    }
-}
-
-// Função para carregar o prontuário do usuário atual
-async function loadMedicalRecord() {
-    console.log("[Main] Iniciando carregamento do prontuário...");
-    try {
-        const medicalRecord = await fetchApi("/api/medical-records/current", "GET", null, true);
-        console.log("[Main] Prontuário recebido:", JSON.stringify(medicalRecord, null, 2));
-
-        document.getElementById("medicalRecordPatient").textContent = medicalRecord.patient && medicalRecord.patient.name 
-            ? medicalRecord.patient.name 
-            : "N/A";
-
-        const recordDate = new Date(medicalRecord.recordDate);
-        const formattedRecordDate = `${recordDate.getDate().toString().padStart(2, '0')}/${(recordDate.getMonth() + 1).toString().padStart(2, '0')}/${recordDate.getFullYear()} ${recordDate.getHours().toString().padStart(2, '0')}:${recordDate.getMinutes().toString().padStart(2, '0')}`;
-        document.getElementById("medicalRecordDate").textContent = formattedRecordDate;
-
-        const appointmentsList = document.getElementById("medicalRecordAppointments");
-        appointmentsList.innerHTML = "";
-
-        if (!medicalRecord.appointments || medicalRecord.appointments.length === 0) {
-            appointmentsList.innerHTML = "<p>Nenhuma consulta associada.</p>";
-        } else {
-            for (const appointment of medicalRecord.appointments) {
-                const patientDisplay = appointment.patientId && appointment.patientId.name 
-                    ? appointment.patientId.name 
-                    : `Paciente (ID: ${appointment.patientId?.id || 'Desconhecido'})`;
-                const healthProfessionalDisplay = appointment.healthProfessionalId && appointment.healthProfessionalId.name 
-                    ? appointment.healthProfessionalId.name 
-                    : `Profissional de Saúde (ID: ${appointment.healthProfessionalId?.id || 'Desconhecido'})`;
-
-                const dateTime = new Date(appointment.dateTime);
-                const formattedDateTime = `${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth() + 1).toString().padStart(2, '0')}/${dateTime.getFullYear()} ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
-
-                const appointmentItem = document.createElement("div");
-                appointmentItem.classList.add("appointment-item");
-                appointmentItem.innerHTML = `
-                    <p><strong>Data e Hora:</strong> ${formattedDateTime}</p>
-                    <p><strong>Tipo:</strong> ${appointmentTypeTranslations[appointment.type] || appointment.type}</p>
-                    <p><strong>Status:</strong> ${appointmentStatusTranslations[appointment.status] || appointment.status}</p>
-                    <p><strong>Motivo:</strong> ${appointment.reason || "N/A"}</p>
-                    <p><strong>Paciente:</strong> ${patientDisplay}</p>
-                    <p><strong>Profissional de Saúde:</strong> ${healthProfessionalDisplay}</p>
-                `;
-                appointmentsList.appendChild(appointmentItem);
-            }
-        }
-
-        const observationsList = document.getElementById("medicalRecordObservations");
-        observationsList.innerHTML = "";
-
-        if (!medicalRecord.observations || medicalRecord.observations.length === 0) {
-            observationsList.innerHTML = "<p>Nenhuma observação registrada.</p>";
-        } else {
-            for (const observation of medicalRecord.observations) {
-                const dateTime = new Date(observation.dateTime);
-                const formattedDateTime = `${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth() + 1).toString().padStart(2, '0')}/${dateTime.getFullYear()} ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
-
-                const observationItem = document.createElement("div");
-                observationItem.classList.add("observation-item");
-                observationItem.innerHTML = `
-                    <p><strong>Data:</strong> ${formattedDateTime}</p>
-                    <p><strong>Observação:</strong> ${observation.text || "N/A"}</p>
-                `;
-                observationsList.appendChild(observationItem);
-            }
-        }
-    } catch (error) {
-        console.error("[Main] Erro ao carregar prontuário:", error.message);
+        console.error("[Users] Erro ao carregar usuário:", error.message);
         showMessage(error.message, 'error');
         setTimeout(() => {
             window.location.href = "/auth/login.html";
@@ -226,10 +103,10 @@ async function loadMedicalRecord() {
 
 // Função para carregar a lista de usuários
 async function loadUsers() {
-    console.log("[Main] Iniciando carregamento da lista de usuários...");
+    console.log("[Users] Iniciando carregamento da lista de usuários...");
     try {
         const users = await fetchApi("/api/users", "GET", null, true);
-        console.log("[Main] Usuários recebidos:", JSON.stringify(users, null, 2));
+        console.log("[Users] Usuários recebidos:", JSON.stringify(users, null, 2));
 
         const usersList = document.getElementById("usersList");
         usersList.innerHTML = "";
@@ -256,7 +133,7 @@ async function loadUsers() {
             }
         }
     } catch (error) {
-        console.error("[Main] Erro ao carregar usuários:", error.message);
+        console.error("[Users] Erro ao carregar usuários:", error.message);
         showMessage("Erro ao carregar usuários: " + error.message, 'error');
         document.getElementById("usersList").innerHTML = "<p>Você não tem permissão para visualizar os usuários.</p>";
     }
@@ -270,10 +147,10 @@ async function searchUserById() {
         return;
     }
 
-    console.log("[Main] Buscando usuário com ID:", userId);
+    console.log("[Users] Buscando usuário com ID:", userId);
     try {
         const user = await fetchApi(`/api/users/${userId}`, "GET", null, true);
-        console.log("[Main] Usuário recebido:", JSON.stringify(user, null, 2));
+        console.log("[Users] Usuário recebido:", JSON.stringify(user, null, 2));
 
         const usersList = document.getElementById("usersList");
         usersList.innerHTML = "";
@@ -294,7 +171,7 @@ async function searchUserById() {
         `;
         usersList.appendChild(userItem);
     } catch (error) {
-        console.error("[Main] Erro ao buscar usuário:", error.message);
+        console.error("[Users] Erro ao buscar usuário:", error.message);
         showMessage("Erro ao buscar usuário: " + error.message, 'error');
         document.getElementById("usersList").innerHTML = "<p>Usuário não encontrado ou você não tem permissão.</p>";
     }
@@ -326,13 +203,12 @@ function toggleMode(clearForm = true) {
 }
 
 // Função para preencher o formulário para edição
-// Função para preencher o formulário para edição
 async function editUser(userId) {
-    console.log("[Main] Editando usuário com ID:", userId);
+    console.log("[Users] Editando usuário com ID:", userId);
     try {
         // Busca os dados do usuário
         const user = await fetchApi(`/api/users/${userId}`, "GET", null, true);
-        console.log("[Main] Dados do usuário para edição:", JSON.stringify(user, null, 2));
+        console.log("[Users] Dados do usuário para edição:", JSON.stringify(user, null, 2));
 
         // Preenche os campos do formulário com os dados do usuário
         document.getElementById("userId").value = user.id || "";
@@ -349,7 +225,7 @@ async function editUser(userId) {
         roleCheckboxes.forEach(checkbox => {
             const hasRole = user.roles && user.roles.some(role => role.name === checkbox.value);
             checkbox.checked = hasRole;
-            console.log(`[Main] Checkbox ${checkbox.value} marcado:`, hasRole);
+            console.log(`[Users] Checkbox ${checkbox.value} marcado:`, hasRole);
         });
 
         // Garante que o formulário esteja visível (modo de cadastro)
@@ -357,12 +233,12 @@ async function editUser(userId) {
             toggleMode(false); // Não limpa o formulário ao entrar no modo de cadastro
         }
     } catch (error) {
-        console.error("[Main] Erro ao carregar dados do usuário para edição:", error.message);
+        console.error("[Users] Erro ao carregar dados do usuário para edição:", error.message);
         showMessage("Erro ao carregar dados do usuário: " + error.message, 'error');
     }
 }
 
-// Função para salvar (cadastrar) um usuário
+// Função para salvar (cadastrar ou atualizar) um usuário
 async function saveUser() {
     const userId = document.getElementById("userId").value;
     const selectedRoles = Array.from(document.querySelectorAll("#userRoles input[name='roles']:checked"))
@@ -387,19 +263,19 @@ async function saveUser() {
     const method = userId ? "PUT" : "POST";
     const url = userId ? `/api/users/${userId}` : "/api/users";
 
-    console.log("[Main] Salvando usuário com método:", method);
-    console.log("[Main] URL:", url);
-    console.log("[Main] Dados enviados:", JSON.stringify(userData, null, 2));
+    console.log("[Users] Salvando usuário com método:", method);
+    console.log("[Users] URL:", url);
+    console.log("[Users] Dados enviados:", JSON.stringify(userData, null, 2));
     try {
         const response = await fetchApi(url, method, userData, true);
-        console.log("[Main] Resposta do servidor:", JSON.stringify(response, null, 2));
+        console.log("[Users] Resposta do servidor:", JSON.stringify(response, null, 2));
         showMessage(userId ? "Usuário atualizado com sucesso!" : "Usuário cadastrado com sucesso!", 'success');
         clearUserForm();
         // Volta para o modo de gerenciamento após salvar
         isRegisterMode = true; // Força a troca de modo
         toggleMode();
     } catch (error) {
-        console.error("[Main] Erro ao salvar usuário:", error);
+        console.error("[Users] Erro ao salvar usuário:", error);
         showMessage("Erro ao salvar usuário: " + error.message, 'error');
     }
 }
@@ -408,13 +284,13 @@ async function saveUser() {
 async function deleteUser(userId) {
     if (!confirm("Tem certeza que deseja deletar este usuário?")) return;
 
-    console.log("[Main] Deletando usuário com ID:", userId);
+    console.log("[Users] Deletando usuário com ID:", userId);
     try {
         await fetchApi(`/api/users/${userId}`, "DELETE", null, true);
         showMessage("Usuário deletado com sucesso!", 'success');
         loadUsers();
     } catch (error) {
-        console.error("[Main] Erro ao deletar usuário:", error.message);
+        console.error("[Users] Erro ao deletar usuário:", error.message);
         showMessage("Erro ao deletar usuário: " + error.message, 'error');
     }
 }

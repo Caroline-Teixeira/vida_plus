@@ -1,0 +1,52 @@
+/* hospital.css */
+.section-title {
+    margin-bottom: 15px;
+}
+
+.section-title h2,
+.section-title h3 {
+    color: #333;
+    margin: 0;
+}
+
+.prontuario-info {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.patient-label {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #333;
+}
+
+.scrollable-container {
+    max-height: 300px; /* Define uma altura fixa para ativar a scrollbar */
+    overflow-y: auto; /* Ativa a scrollbar vertical */
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+/* Estilo específico para a seção de observações no prontuário */
+.observacoes-container {
+    max-height: 200px; /* Altura menor para observações, ajustável conforme necessário */
+}
+
+.appointment-item,
+.observation-item {
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.appointment-item p,
+.observation-item p {
+    margin: 5px 0;
+}

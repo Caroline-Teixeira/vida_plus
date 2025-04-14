@@ -1,81 +1,4 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-}
-
-header {
-    background-color: #625ff79a;
-    color: white;
-    padding: 10px 20px;
-    text-align: center;
-}
-
-header h1 {
-    margin: 0;
-}
-
-nav ul.tabs {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    background-color: #94a3fa67;
-}
-
-nav ul.tabs li {
-    margin: 0 5px;
-}
-
-nav ul.tabs li a {
-    display: block;
-    padding: 10px 20px;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-nav ul.tabs li a.active {
-    background-color: #625ff79a;
-}
-
-nav ul.tabs li a:hover {
-    background-color: #94a3fa67;
-}
-
-main {
-    padding: 20px;
-}
-
-.tab-content {
-    display: none;
-}
-
-.tab-content.active {
-    display: block;
-}
-
-.tab-content h2 {
-    color: #333;
-}
-
-.logout-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: #e63946;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.logout-btn:hover {
-    background-color: #d62828;
-}
-
+/* users.css */
 /* Estilos para a Aba Gerenciar Usuários */
 .manage-users-actions {
     margin-bottom: 20px;
@@ -94,7 +17,9 @@ main {
     background-color: #94a3fa67;
 }
 
-.user-form, .user-list, .user-search {
+.user-form,
+.user-list,
+.user-search {
     margin-bottom: 20px;
     padding: 15px;
     background-color: #fff;
@@ -102,13 +27,16 @@ main {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.user-form label, .user-search label {
+.user-form label,
+.user-search label {
     display: block;
     margin-bottom: 5px;
     font-weight: normal;
 }
 
-.user-form input, .user-form select, .user-search input {
+.user-form input,
+.user-form select,
+.user-search input {
     width: 100%;
     padding: 8px;
     margin-bottom: 10px;
@@ -184,7 +112,8 @@ main {
     color: #333;
 }
 
-.user-form button, .user-search button {
+.user-form button,
+.user-search button {
     background-color: #625ff79a;
     color: white;
     padding: 8px 16px;
@@ -194,7 +123,8 @@ main {
     margin-right: 10px;
 }
 
-.user-form button:hover, .user-search button:hover {
+.user-form button:hover,
+.user-search button:hover {
     background-color: #94a3fa67;
 }
 
@@ -224,21 +154,4 @@ main {
 
 .user-list .user-item button:hover {
     opacity: 0.8;
-}
-
-.message-box {
-    padding: 10px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    text-align: center;
-}
-
-.message-box.success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.message-box.error {
-    background-color: #f8d7da;
-    color: #721c24;
 }

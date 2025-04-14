@@ -101,6 +101,13 @@ public class UserController {
         user.setGender(userDto.getGender());
         user.setContact(userDto.getContact());
 
+        // Verifica se o CPF foi alterado e se já existe
+        if (userDto.getCpf() != null && !userDto.getCpf().isEmpty() && !user.getCpf().equals(userDto.getCpf())) {
+            if (userService.existsByCpf(userDto.getCpf())) {
+                throw new RuntimeException("CPF existente: " + userDto.getCpf());
+            }
+            user.setCpf(userDto.getCpf());
+        }
         
         // Verifica se o email foi alterado e se já existe
         if (!user.getEmail().equals(userDto.getEmail()) && userService.existsByEmail(userDto.getEmail())) {
