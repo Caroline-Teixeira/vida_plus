@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import br.com.vidaplus.model.Appointment;
 import br.com.vidaplus.model.MedicalRecord;
+import br.com.vidaplus.model.Surgery;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.MedicalRecordRepository;
 
@@ -92,9 +93,32 @@ public class MedicalRecordService {
         medicalRecordRepository.save(medicalRecord);
     }
 
-    // Atualiza as observações de um prontuário
+    // método para adicionar observações de cirurgias
+    public void addSurgeryObservations(MedicalRecord medicalRecord, Surgery surgery, String observations) {
+        if (observations == null) {
+            throw new IllegalArgumentException("Observações não podem ser nulas.");
+        }
+
+        if (observations.trim().isEmpty()) {
+            return;
+        }
+
+        String dateTime = surgery.getDateTime().format(DATE_TIME_FORMATTER);
+        String formattedObservation = "Surgery-" + surgery.getId() + " | " + dateTime + " | " + observations;
+
+        String currentObservations = medicalRecord.getObservations();
+        if (currentObservations == null || currentObservations.trim().isEmpty()) {
+            medicalRecord.setObservations(formattedObservation);
+        } else {
+            medicalRecord.setObservations(currentObservations + " || " + formattedObservation);
+        }
+
+        medicalRecordRepository.save(medicalRecord);
+    }
+
+    // Atualiza as observações de consulta de um prontuário
     @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
-    public void updateObservations(MedicalRecord medicalRecord, List<Long> appointmentIds, String newObservations) {
+    public void updateObservations(MedicalRecord medicalRecord, List<Long> appointmentIds, String newObservations, Appointment appointment) {
         // Verifica se as observações são válidas
         if (newObservations == null || newObservations.trim().isEmpty()) {
             throw new IllegalArgumentException("Observações não podem ser vazias.");
@@ -106,7 +130,7 @@ public class MedicalRecordService {
         }
 
         // Usa a data atual para a nova observação
-        String dateTime = LocalDateTime.now().format(DATE_TIME_FORMATTER);
+        String dateTime = appointment.getDateTime().format(DATE_TIME_FORMATTER);
 
         // Obtém as observações existentes
         String currentObservations = medicalRecord.getObservations();
@@ -164,6 +188,67 @@ public class MedicalRecordService {
         medicalRecordRepository.save(medicalRecord);
     }
 
+
+    // método para atualizar observações de cirurgias
+    @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
+    public void updateSurgeryObservations(MedicalRecord medicalRecord, List<Long> surgeryIds, String newObservations, Surgery surgery) {
+        if (newObservations == null || newObservations.trim().isEmpty()) {
+            throw new IllegalArgumentException("Observações não podem ser vazias.");
+        }
+
+        if (surgeryIds == null || surgeryIds.isEmpty()) {
+            throw new IllegalArgumentException("Nenhum ID de cirurgia fornecido.");
+        }
+
+        String dateTime = surgery.getDateTime().format(DATE_TIME_FORMATTER);
+        String currentObservations = medicalRecord.getObservations();
+        List<String> updatedEntries = new ArrayList<>();
+
+        if (currentObservations == null || currentObservations.trim().isEmpty()) {
+            for (Long surgeryId : surgeryIds) {
+                String formattedObservation = "Surgery-" + surgeryId + " | " + dateTime + " | " + newObservations;
+                updatedEntries.add(formattedObservation);
+            }
+        } else {
+            String[] observationEntries = currentObservations.split(" \\|\\| ");
+            boolean updated = false;
+
+            for (String entry : observationEntries) {
+                String[] parts = entry.split(" \\| ", 3);
+                if (parts.length < 3) {
+                    continue;
+                }
+
+                String idPart = parts[0].trim();
+                Long entryId;
+                try {
+                    entryId = Long.parseLong(idPart.replace("Surgery-", ""));
+                } catch (NumberFormatException e) {
+                    updatedEntries.add(entry);
+                    continue;
+                }
+
+                if (surgeryIds.contains(entryId) && idPart.startsWith("Surgery-")) {
+                    String formattedObservation = "Surgery-" + entryId + " | " + dateTime + " | " + newObservations;
+                    updatedEntries.add(formattedObservation);
+                    updated = true;
+                } else {
+                    updatedEntries.add(entry);
+                }
+            }
+
+            if (!updated) {
+                for (Long surgeryId : surgeryIds) {
+                    String formattedObservation = "Surgery-" + surgeryId + " | " + dateTime + " | " + newObservations;
+                    updatedEntries.add(formattedObservation);
+                }
+            }
+        }
+
+        medicalRecord.setObservations(String.join(" || ", updatedEntries));
+        medicalRecordRepository.save(medicalRecord);
+    }
+
     // Remove as observações por intervalo de datas
     public int removeObservationEntries(User patient, LocalDateTime startDate, LocalDateTime endDate) {
         // Busca o prontuário do paciente
@@ -209,6 +294,58 @@ public class MedicalRecordService {
         }
 
         // Atualiza as observações do prontuário com as entradas mantidas
+        medicalRecord.setObservations(String.join(" || ", keptEntries));
+        medicalRecordRepository.save(medicalRecord);
+
+        return removedEntries;
+    }
+
+    // método para remover observações de cirurgias
+    @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
+    public int removeSurgeryObservationEntries(User patient, List<Long> surgeryIds) {
+        Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
+        if (!medicalRecordOptional.isPresent()) {
+            throw new RuntimeException("Prontuário não encontrado para o paciente.");
+        }
+
+        MedicalRecord medicalRecord = medicalRecordOptional.get();
+        String observations = medicalRecord.getObservations();
+
+        if (observations == null || observations.trim().isEmpty()) {
+            return 0;
+        }
+
+        String[] observationEntries = observations.split(" \\|\\| ");
+        List<String> keptEntries = new ArrayList<>();
+        int removedEntries = 0;
+
+        for (String entry : observationEntries) {
+            String[] parts = entry.split(" \\| ", 3);
+            if (parts.length < 3) {
+                continue;
+            }
+
+            String idPart = parts[0].trim();
+            if (!idPart.startsWith("Surgery-")) {
+                keptEntries.add(entry);
+                continue;
+            }
+
+            Long entryId;
+            try {
+                entryId = Long.parseLong(idPart.replace("Surgery-", ""));
+            } catch (NumberFormatException e) {
+                keptEntries.add(entry);
+                continue;
+            }
+
+            if (surgeryIds.contains(entryId)) {
+                removedEntries++;
+            } else {
+                keptEntries.add(entry);
+            }
+        }
+
         medicalRecord.setObservations(String.join(" || ", keptEntries));
         medicalRecordRepository.save(medicalRecord);
 

@@ -37,6 +37,10 @@ public class MedicalRecord {
     @JsonManagedReference
     private List<Appointment> appointments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "medicalRecord", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<Surgery> surgeries = new ArrayList<>();
+
     @Column(columnDefinition = "TEXT")
     @JsonSerialize(using = ObservationsSerializer.class)
     private String observations;

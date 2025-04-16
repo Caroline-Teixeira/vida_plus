@@ -35,5 +35,8 @@ public class ProfessionalSchedule {
     @OneToMany(mappedBy = "schedule")
     private List<Appointment> appointments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "schedule")
+    private List<Surgery> surgeries = new ArrayList<>();
+
     
 }

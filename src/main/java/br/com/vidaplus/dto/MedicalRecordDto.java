@@ -10,6 +10,7 @@ public class MedicalRecordDto {
     private Long id;
     private User patient;
     private List<Long> appointmentIds;
+    private List<Long> surgeryIds;
     private String observations;
     private LocalDateTime recordDate;
 
@@ -54,4 +55,12 @@ public class MedicalRecordDto {
         this.recordDate = recordDate;
     }
 
+    public List<Long> getSurgeryIds() {
+        return surgeryIds;
+    }
+
+    public void setSurgeryIds(List<Long> surgeryIds) {
+        this.surgeryIds = surgeryIds;
+
+    }
 }

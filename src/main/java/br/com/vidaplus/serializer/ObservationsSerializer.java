@@ -24,12 +24,16 @@ public class ObservationsSerializer extends JsonSerializer<String> {
                 continue; // Ignora entradas mal formatadas
             }
 
-            String appointmentId = parts[0].trim();
+            String id = parts[0].trim();
             String dateTimeStr = parts[1].trim();
             String observationText = parts[2].trim();
 
             jsonGenerator.writeStartObject();
-            jsonGenerator.writeStringField("appointmentId", appointmentId);
+            if (id.startsWith("Surgery-")) {
+                jsonGenerator.writeStringField("surgeryId", id.replace("Surgery-", ""));
+            } else {
+                jsonGenerator.writeStringField("appointmentId", id);
+            }
             jsonGenerator.writeStringField("dateTime", dateTimeStr);
             jsonGenerator.writeStringField("text", observationText);
             jsonGenerator.writeEndObject();

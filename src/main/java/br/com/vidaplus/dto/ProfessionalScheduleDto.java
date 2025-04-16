@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import br.com.vidaplus.model.Appointment;
+import br.com.vidaplus.model.Surgery;
 
 public class ProfessionalScheduleDto {
 
@@ -13,6 +14,7 @@ public class ProfessionalScheduleDto {
     
     private List<Appointment> availableSlots;
     private List<Appointment> bookedSlots;
+    private List<Surgery> bookedSurgeries;
 
     // Construtores
     public ProfessionalScheduleDto() {
@@ -43,7 +45,6 @@ public class ProfessionalScheduleDto {
         this.date = date;
     }
 
-
     public List<Appointment> getAvailableSlots() {
         return availableSlots;
     }
@@ -55,7 +56,17 @@ public class ProfessionalScheduleDto {
     public List<Appointment> getBookedSlots() {
         return bookedSlots;
     }
+
     public void setBookedSlots(List<Appointment> bookedSlots) {
         this.bookedSlots = bookedSlots;
     }
+
+    public List<Surgery> getBookedSurgeries() {
+        return bookedSurgeries;
+    }
+
+    public void setBookedSurgeries(List<Surgery> bookedSurgeries) {
+        this.bookedSurgeries = bookedSurgeries;
+    }
+
 }
