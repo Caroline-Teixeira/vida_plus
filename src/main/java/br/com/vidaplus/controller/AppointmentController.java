@@ -88,11 +88,9 @@ public class AppointmentController {
                 appointmentDto.getReason(),
                 appointmentDto.getObservations()
             );
-            //if (appointment != null) {
+            
                 return ResponseEntity.ok(appointment);
-            //} else {
-                //throw new RuntimeException("Erro ao agendar consulta: acesso negado ou dados inválidos");
-            //}
+            
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao agendar consulta: " + e.getMessage());
         }
