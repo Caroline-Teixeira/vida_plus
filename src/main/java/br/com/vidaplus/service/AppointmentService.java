@@ -16,8 +16,10 @@ import br.com.vidaplus.model.AppointmentStatus;
 import br.com.vidaplus.model.AppointmentType;
 import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Profile;
+import br.com.vidaplus.model.Surgery;
 import br.com.vidaplus.model.User;
 import br.com.vidaplus.repository.AppointmentRepository;
+import br.com.vidaplus.repository.SurgeryRepository;
 import br.com.vidaplus.repository.UserRepository;
 import jakarta.transaction.Transactional;
 
@@ -29,16 +31,19 @@ public class AppointmentService {
     private final UserRepository userRepository;
     private final MedicalRecordService medicalRecordService;
     private final UserService userService;
+    private final SurgeryRepository surgeryRepository;
 
     @Autowired
     public AppointmentService(AppointmentRepository appointmentRepository,
                              UserRepository userRepository,
                              MedicalRecordService medicalRecordService,
-                             UserService userService) {
+                             UserService userService,
+                             SurgeryRepository surgeryRepository) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
         this.medicalRecordService = medicalRecordService;
         this.userService = userService;
+        this.surgeryRepository = surgeryRepository;
     }
     
     // lista todas as consultas
@@ -129,6 +134,28 @@ public class AppointmentService {
         if (!isHealthProfessional) {
             throw new RuntimeException("Usuário não é Profissional da Saúde.");
         }
+
+        // Verifica conflitos com consultas existentes
+        LocalDateTime startOfDay = dateTime.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
+        List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Appointment booked : bookedAppointments) {
+            if (booked.getDateTime().getHour() == dateTime.getHour()) {
+                throw new RuntimeException("Horário indisponível, escolha outro horário");
+            }
+        }
+
+        // Verifica conflitos com cirurgias existentes
+        List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Surgery surgery : bookedSurgeries) {
+            int surgeryHour = surgery.getDateTime().getHour();
+            if (dateTime.getHour() == surgeryHour || dateTime.getHour() == surgeryHour + 1) {
+                throw new RuntimeException("Horário indisponível, escolha outro horário");
+            }
+        }
+
         
         // Busca ou cria o Prontuário para o paciente
         MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
@@ -218,6 +245,28 @@ public class AppointmentService {
         if (isHealthProfessional == false) {
             throw new RuntimeException("Usuário não é Profissional da Saúde.");
         }
+
+        // Verifica conflitos com consultas existentes
+        LocalDateTime startOfDay = dateTime.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
+        List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Appointment booked : bookedAppointments) {
+            if (!booked.getId().equals(id) && booked.getDateTime().getHour() == dateTime.getHour()) {
+                throw new RuntimeException("Horário indisponível, escolha outro horário");
+            }
+        }
+
+        // Verifica conflitos com cirurgias existentes
+        List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Surgery surgery : bookedSurgeries) {
+            int surgeryHour = surgery.getDateTime().getHour();
+            if (dateTime.getHour() == surgeryHour || dateTime.getHour() == surgeryHour + 1) {
+                throw new RuntimeException("Horário indisponível, escolha outro horário");
+            }
+        }
+
 
         // Busca ou cria o Prontuário para o paciente
         MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
