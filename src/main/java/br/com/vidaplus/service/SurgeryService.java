@@ -31,18 +31,21 @@ public class SurgeryService {
     private final MedicalRecordService medicalRecordService;
     private final UserService userService;
     private final AppointmentRepository appointmentRepository;
+    private final HospitalizationService hospitalizationService;
 
     @Autowired
     public SurgeryService(SurgeryRepository surgeryRepository,
                           UserRepository userRepository,
                           MedicalRecordService medicalRecordService,
                           UserService userService,
-                          AppointmentRepository appointmentRepository) {
+                          AppointmentRepository appointmentRepository,
+                          HospitalizationService hospitalizationService) {
         this.surgeryRepository = surgeryRepository;
         this.userRepository = userRepository;
         this.medicalRecordService = medicalRecordService;
         this.userService = userService;
         this.appointmentRepository = appointmentRepository;
+        this.hospitalizationService = hospitalizationService;
     }
 
     // Método para buscar todas as cirurgias
@@ -162,7 +165,12 @@ public class SurgeryService {
         surgery.setBed(bed);
         surgery.setMedicalRecord(medicalRecord);
 
-        return surgeryRepository.save(surgery);
+        Surgery savedSurgery = surgeryRepository.save(surgery);
+
+        // internação
+        hospitalizationService.createHospitalizationForSurgery(savedSurgery);
+
+        return savedSurgery;
     }
 
     // Método pra atualizar status da cirurgia
@@ -260,7 +268,14 @@ public class SurgeryService {
             surgery.setBed(bed);
             surgery.setMedicalRecord(medicalRecord);
 
-            return surgeryRepository.save(surgery);
+            
+            Surgery savedSurgery = surgeryRepository.save(surgery);
+
+            // internação
+            hospitalizationService.createHospitalizationForSurgery(savedSurgery);
+
+            return savedSurgery;
+
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao atualizar cirurgia: " + e.getMessage());
         }
