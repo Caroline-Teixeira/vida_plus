@@ -1,5 +1,3 @@
-// users.js
-
 // Variáveis globais para armazenar o ID, nome e papéis do usuário atual
 let currentUserId = null;
 let currentUserName = null;
@@ -318,6 +316,8 @@ window.onload = function() {
                 loadAppointments();
             } else if (tabName === "prontuario") {
                 loadMedicalRecord();
+            } else if (tabName === "cirurgias") {
+                loadSurgeries();
             } else if (tabName === "gerenciar-usuarios") {
                 // Garante que a aba comece no modo de gerenciamento
                 isRegisterMode = false;

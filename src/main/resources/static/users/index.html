@@ -15,6 +15,7 @@
             <ul class="tabs">
                 <li><a href="#" class="tab-button active" data-tab="meus-dados">Meus Dados</a></li>
                 <li><a href="#" class="tab-button" data-tab="consultas">Consultas</a></li>
+                <li><a href="#" class="tab-button" data-tab="cirurgias">Cirurgias</a></li>
                 <li><a href="#" class="tab-button" data-tab="prontuario">Prontuário</a></li>
                 <li id="manageUsersTab" style="display: none;"><a href="#" class="tab-button" data-tab="gerenciar-usuarios">Gerenciar Usuários</a></li>
             </ul>
@@ -77,11 +78,34 @@
             </div>
             
             <div class="section-title">
+                <h3>Cirurgias Associadas</h3>
+            </div>
+            
+            <div class="scrollable-container">
+                <div id="medicalRecordSurgeries">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
+            
+            <div class="section-title">
                 <h3>Observações</h3>
             </div>
             
             <div class="scrollable-container observacoes-container">
                 <div id="medicalRecordObservations">
+                    <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Aba Cirurgias -->
+        <div id="cirurgias" class="tab-content">
+            <div class="section-title">
+                <h2>Cirurgias</h2>
+            </div>
+            
+            <div class="scrollable-container">
+                <div id="surgeriesList">
                     <!-- O conteúdo será inserido dinamicamente pelo JavaScript -->
                 </div>
             </div>
@@ -147,7 +171,7 @@
         </div>
     </main>
 
-    <!-- JavaScript para renderizar consultas dinamicamente -->
+    <!-- JavaScript para renderizar dinamicamente -->
     <script src="/js/utils.js"></script>
     <script src="/js/users.js"></script>
     <script src="/js/hospital.js"></script>

@@ -1,4 +1,3 @@
-/* hospital.css */
 .section-title {
     margin-bottom: 15px;
 }
@@ -39,6 +38,7 @@
 }
 
 .appointment-item,
+.surgery-item,
 .observation-item {
     padding: 10px;
     margin-bottom: 10px;
@@ -47,6 +47,7 @@
 }
 
 .appointment-item p,
+.surgery-item p,
 .observation-item p {
     margin: 5px 0;
 }

@@ -1,5 +1,3 @@
-// hospital.js
-
 // Função para criar um prontuário padrão no frontend
 function createDefaultMedicalRecord() {
     const currentDate = new Date();
@@ -9,6 +7,7 @@ function createDefaultMedicalRecord() {
         patient: { name: currentUserName || "Usuário Atual" },
         recordDate: formattedDate,
         appointments: [],
+        surgeries: [], // Adicionado para suportar a nova seção de cirurgias
         observations: []
     };
 }
@@ -67,6 +66,58 @@ async function loadAppointments() {
     }
 }
 
+// Função para carregar as cirurgias do usuário atual
+async function loadSurgeries() {
+    console.log("[Hospital] Iniciando carregamento das cirurgias...");
+    try {
+        const surgeries = await fetchApi("/api/surgeries/current", "GET", null, true);
+        console.log("[Hospital] Cirurgias recebidas:", JSON.stringify(surgeries, null, 2));
+
+        const surgeriesList = document.getElementById("surgeriesList");
+        surgeriesList.innerHTML = "";
+
+        if (!surgeries || surgeries.length === 0) {
+            surgeriesList.innerHTML = "<p>Nenhuma cirurgia encontrada.</p>";
+            return;
+        }
+
+        for (const surgery of surgeries) {
+            const patientDisplay = surgery.patientId && surgery.patientId.name 
+                ? surgery.patientId.name 
+                : `Paciente (ID: ${surgery.patientId?.id || 'Desconhecido'})`;
+            const healthProfessionalDisplay = surgery.healthProfessionalId && surgery.healthProfessionalId.name 
+                ? surgery.healthProfessionalId.name 
+                : `Profissional de Saúde (ID: ${surgery.healthProfessionalId?.id || 'Desconhecido'})`;
+
+            const dateTime = new Date(surgery.dateTime);
+            const formattedDateTime = `${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth() + 1).toString().padStart(2, '0')}/${dateTime.getFullYear()} ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
+
+            const surgeryItem = document.createElement("div");
+            surgeryItem.classList.add("surgery-item");
+            surgeryItem.innerHTML = `
+                <p><strong>Data e Hora:</strong> ${formattedDateTime}</p>
+                <p><strong>Status:</strong> ${appointmentStatusTranslations[surgery.status] || surgery.status}</p>
+                <p><strong>Motivo:</strong> ${surgery.reason || "N/A"}</p>
+                <p><strong>Leito:</strong> ${surgery.bed || "N/A"}</p>
+                <p><strong>Paciente:</strong> ${patientDisplay}</p>
+                <p><strong>Profissional de Saúde:</strong> ${healthProfessionalDisplay}</p>
+            `;
+            surgeriesList.appendChild(surgeryItem);
+        }
+    } catch (error) {
+        console.error("[Hospital] Erro ao carregar cirurgias:", error.message);
+        if (error.message.includes("401") || error.message.includes("403")) {
+            showMessage("Erro de autenticação. Faça login novamente.", 'error');
+            setTimeout(() => {
+                localStorage.removeItem("hospital-token");
+                window.location.href = "/auth/login.html";
+            }, 3000);
+            return;
+        }
+        showMessage(error.message, 'error');
+    }
+}
+
 // Função para carregar o prontuário do usuário atual
 async function loadMedicalRecord() {
     console.log("[Hospital] Iniciando carregamento do prontuário...");
@@ -102,6 +153,7 @@ async function loadMedicalRecord() {
     const formattedRecordDate = `${recordDate.getDate().toString().padStart(2, '0')}/${(recordDate.getMonth() + 1).toString().padStart(2, '0')}/${recordDate.getFullYear()} ${recordDate.getHours().toString().padStart(2, '0')}:${recordDate.getMinutes().toString().padStart(2, '0')}`;
     document.getElementById("medicalRecordDate").textContent = formattedRecordDate;
 
+    // Renderização das consultas associadas
     const appointmentsList = document.getElementById("medicalRecordAppointments");
     appointmentsList.innerHTML = "";
 
@@ -133,6 +185,39 @@ async function loadMedicalRecord() {
         }
     }
 
+    // Renderização das cirurgias associadas
+    const surgeriesList = document.getElementById("medicalRecordSurgeries");
+    surgeriesList.innerHTML = "";
+
+    if (!medicalRecord.surgeries || medicalRecord.surgeries.length === 0) {
+        surgeriesList.innerHTML = "<p>Nenhuma cirurgia associada.</p>";
+    } else {
+        for (const surgery of medicalRecord.surgeries) {
+            const patientDisplay = surgery.patientId && surgery.patientId.name 
+                ? surgery.patientId.name 
+                : `Paciente (ID: ${surgery.patientId?.id || 'Desconhecido'})`;
+            const healthProfessionalDisplay = surgery.healthProfessionalId && surgery.healthProfessionalId.name 
+                ? surgery.healthProfessionalId.name 
+                : `Profissional de Saúde (ID: ${surgery.healthProfessionalId?.id || 'Desconhecido'})`;
+
+            const dateTime = new Date(surgery.dateTime);
+            const formattedDateTime = `${dateTime.getDate().toString().padStart(2, '0')}/${(dateTime.getMonth() + 1).toString().padStart(2, '0')}/${dateTime.getFullYear()} ${dateTime.getHours().toString().padStart(2, '0')}:${dateTime.getMinutes().toString().padStart(2, '0')}`;
+
+            const surgeryItem = document.createElement("div");
+            surgeryItem.classList.add("surgery-item");
+            surgeryItem.innerHTML = `
+                <p><strong>Data e Hora:</strong> ${formattedDateTime}</p>
+                <p><strong>Status:</strong> ${appointmentStatusTranslations[surgery.status] || surgery.status}</p>
+                <p><strong>Motivo:</strong> ${surgery.reason || "N/A"}</p>
+                <p><strong>Leito:</strong> ${surgery.bed || "N/A"}</p>
+                <p><strong>Paciente:</strong> ${patientDisplay}</p>
+                <p><strong>Profissional de Saúde:</strong> ${healthProfessionalDisplay}</p>
+            `;
+            surgeriesList.appendChild(surgeryItem);
+        }
+    }
+
+    // Renderização das observações
     const observationsList = document.getElementById("medicalRecordObservations");
     observationsList.innerHTML = "";
 
