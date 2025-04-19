@@ -17,17 +17,14 @@ Ferramentas:
 Maven (gerenciamento de dependências)
 Postman (testes de API)
 
-Clone o repositório:
-git clone https://github.com/Caroline-Teixeira/vida_plus.git
+<h2>Clone e configurações</h2>
+Clone o repositório: git clone https://github.com/Caroline-Teixeira/vida_plus.git
 
 
-Navegue até o diretório:
-cd vida_plus
+Navegue até o diretório: cd vida_plus
 
 
-Configure o banco de dados:
-
-Crie um banco MySQL chamado vidaplus:
+Configure o banco de dados (MySQL):
 CREATE DATABASE hospital_vidaplus;
 
 
@@ -46,9 +43,9 @@ mvn spring-boot:run
 API:
 
 Acesse http://localhost:8080 (ou porta configurada).
-Use o Postman para testar endpoints, ex.:
-POST /auth/login
-GET /api/users
+<p>Use o Postman para testar endpoints</p>, ex.:
+<br>POST /auth/login
+<br>GET /api/users
 
 
 
