@@ -12,6 +12,7 @@ import br.com.vidaplus.model.User;
 @Repository
 public interface ProfessionalScheduleRepository extends JpaRepository<ProfessionalSchedule, Long>{
 
+    // Para encontrar a agenda de um profissional de saúde específico
     Optional<ProfessionalSchedule> findByHealthProfessionalAndDate(User healthProfessional, LocalDate date);
 
 }

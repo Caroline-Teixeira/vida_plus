@@ -24,7 +24,9 @@ import lombok.Data;
 @Table(name = "medical_record")
 @Data
 public class MedicalRecord {
+    // Classe do prontuário médico do paciente
 
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -7,5 +7,5 @@ public enum PermissionState {
     WRITE,
     MANAGEMENT;
 
-
+    // permissões caso seja necessário mais perfils de admin, Ex: admin de TI, admin de financeiro
 }

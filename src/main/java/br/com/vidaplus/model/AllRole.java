@@ -19,6 +19,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class AllRole {
+
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty("id")

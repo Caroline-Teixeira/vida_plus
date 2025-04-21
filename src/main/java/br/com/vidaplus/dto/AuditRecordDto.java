@@ -2,6 +2,7 @@ package br.com.vidaplus.dto;
 
 public class AuditRecordDto {
 
+    // Atributos
     private String username;
     private String action;   
 

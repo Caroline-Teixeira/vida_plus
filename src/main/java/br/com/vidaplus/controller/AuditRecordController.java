@@ -36,7 +36,7 @@ public class AuditRecordController {
         }
     }
 
-    // POST para buscar registros de auditoria com filtros
+    // POST para buscar registros de auditoria com filtros (usuário e ação)
     @PostMapping("/filter")
     public ResponseEntity<List<AuditRecord>> getAuditRecordsByFilter(@RequestBody AuditRecordDto auditRecordDto) {
         try {

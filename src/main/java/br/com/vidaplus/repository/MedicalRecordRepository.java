@@ -11,6 +11,6 @@ import br.com.vidaplus.model.User;
 @Repository
 public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
 
-    // Busca um MedicalRecord pelo paciente
+    // Para encontrar o prontuário médico de um paciente específico
     Optional<MedicalRecord> findByPatient(User patient);
 }

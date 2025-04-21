@@ -189,7 +189,7 @@ function toggleMode(clearForm = true) {
         usersListContainer.style.display = "none";
         userSearchContainer.style.display = "none";
         if (clearForm) {
-            clearUserForm(); // Limpa o formulário apenas se clearForm for true
+            clearUserForm(); // Limpa o formulário apenas se for true
         }
     } else {
         toggleButton.textContent = "Cadastrar Usuário";
@@ -269,6 +269,7 @@ async function saveUser() {
         console.log("[Users] Resposta do servidor:", JSON.stringify(response, null, 2));
         showMessage(userId ? "Usuário atualizado com sucesso!" : "Usuário cadastrado com sucesso!", 'success');
         clearUserForm();
+        
         // Volta para o modo de gerenciamento após salvar
         isRegisterMode = true; // Força a troca de modo
         toggleMode();

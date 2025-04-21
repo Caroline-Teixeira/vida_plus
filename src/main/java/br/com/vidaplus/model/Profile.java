@@ -5,5 +5,5 @@ public enum Profile {
     HEALTH_PROFESSIONAL,
     ATTENDANT,
     ADMIN;
-    
+    // caso seja necessário adicionar mais perfis, basta adicionar aqui
 }

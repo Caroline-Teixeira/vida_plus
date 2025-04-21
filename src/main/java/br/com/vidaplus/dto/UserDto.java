@@ -9,6 +9,8 @@ import br.com.vidaplus.model.Gender;
 import br.com.vidaplus.model.Profile;
 
 public class UserDto {
+
+    // Atributos
     private Long id;
     private String name;
     private String cpf;

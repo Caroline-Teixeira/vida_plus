@@ -27,7 +27,9 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Surgery {
+    // Classe da cirurgia
 
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -48,7 +50,7 @@ public class Surgery {
     private LocalDateTime dateTime;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;
+    private EventStatus status;
 
     private String reason;
 

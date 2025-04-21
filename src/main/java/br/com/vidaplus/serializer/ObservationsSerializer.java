@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 public class ObservationsSerializer extends JsonSerializer<String> {
 
+    // Serialização de observações
+
     @Override
     public void serialize(String observations, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
         if (observations == null || observations.trim().isEmpty()) {

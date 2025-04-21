@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.dto.HospitalizationDto;
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.model.Hospitalization;
 import br.com.vidaplus.model.Surgery;
 import br.com.vidaplus.repository.HospitalizationRepository;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -27,10 +28,10 @@ public class HospitalizationService {
     );
 
     // Status considerados ativos para internações
-    private static final List<AppointmentStatus> ACTIVE_STATUSES = Arrays.asList(
-        AppointmentStatus.SCHEDULED,
-        AppointmentStatus.CONFIRMED,
-        AppointmentStatus.IN_PROGRESS
+    private static final List<EventStatus> ACTIVE_STATUSES = Arrays.asList(
+        EventStatus.SCHEDULED,
+        EventStatus.CONFIRMED,
+        EventStatus.IN_PROGRESS
     );
 
     @Autowired
@@ -38,7 +39,7 @@ public class HospitalizationService {
         this.hospitalizationRepository = hospitalizationRepository;
     }
 
-    // Criar internação automaticamente ao agendar cirurgia
+    // Cria a internação automaticamente ao agendar cirurgia
     public Hospitalization createHospitalizationForSurgery(Surgery surgery) {
         String bed = surgery.getBed();
         boolean isValidBed = false;
@@ -51,38 +52,30 @@ public class HospitalizationService {
         if (!isValidBed) {
             throw new RuntimeException("Leito inválido: " + bed);
         }
-
-        // Verificar se o leito está ocupado
+    
         List<Hospitalization> activeHospitalizations = hospitalizationRepository.findByBedAndStatusIn(bed, ACTIVE_STATUSES);
         if (!activeHospitalizations.isEmpty()) {
             throw new RuntimeException("Leito ocupado: " + bed);
         }
-
+    
         Hospitalization hospitalization = new Hospitalization();
         hospitalization.setSurgery(surgery);
         hospitalization.setBed(bed);
         hospitalization.setStatus(surgery.getStatus());
-
+    
         return hospitalizationRepository.save(hospitalization);
     }
 
-    // Atualizar status da internação
+    // Atualiza status da internação
     public void updateHospitalizationStatus(Surgery surgery) {
-        List<Hospitalization> hospitalizations = hospitalizationRepository.findAll();
-        Hospitalization targetHospitalization = null;
-        for (Hospitalization hospitalization : hospitalizations) {
-            if (hospitalization.getSurgery().getId().equals(surgery.getId())) {
-                targetHospitalization = hospitalization;
-                break;
-            }
-        }
-        if (targetHospitalization != null) {
-            targetHospitalization.setStatus(surgery.getStatus());
-            hospitalizationRepository.save(targetHospitalization);
+        Hospitalization hospitalization = hospitalizationRepository.findBySurgery(surgery);
+        if (hospitalization != null) {
+            hospitalization.setStatus(surgery.getStatus());
+            hospitalizationRepository.save(hospitalization);
         }
     }
 
-    // Listar internações ativas
+    // Lista as internações ativas
     public List<HospitalizationDto> getActiveHospitalizations() {
         List<Hospitalization> hospitalizations = hospitalizationRepository.findByStatusIn(ACTIVE_STATUSES);
         List<HospitalizationDto> dtos = new ArrayList<>();
@@ -97,7 +90,7 @@ public class HospitalizationService {
         return dtos;
     }
 
-    // Listar leitos disponíveis
+    // Lista os leitos disponíveis
     public List<String> getAvailableBeds() {
         List<String> availableBeds = new ArrayList<String>();
         for (String bed : AVAILABLE_BEDS) {
@@ -116,11 +109,14 @@ public class HospitalizationService {
         return availableBeds;
     }
 
-    // Para deletar internação associada a uma cirurgia
+    // Para deletar internação associada a uma cirurgia (automático)
     public void deleteBySurgery(Surgery surgery) {
         Hospitalization hospitalization = hospitalizationRepository.findBySurgery(surgery);
         if (hospitalization != null) {
             hospitalizationRepository.delete(hospitalization);
         }
     }
+   
+    
+
 }

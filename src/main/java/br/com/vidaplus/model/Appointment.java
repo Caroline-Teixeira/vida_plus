@@ -27,7 +27,9 @@ import lombok.Data;
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Appointment {
+    // Classe do agendamento de consultas
 
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -51,7 +53,7 @@ public class Appointment {
     private AppointmentType type;
     
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;
+    private EventStatus status;
     
     private String reason;
     

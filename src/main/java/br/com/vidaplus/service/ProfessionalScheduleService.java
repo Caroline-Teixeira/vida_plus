@@ -45,10 +45,10 @@ public class ProfessionalScheduleService {
     }
 
     // Verifica os horários disponíveis e agendados
-    // proId: ID do profissional
     @Transactional
     public List<Appointment> getAvailableSlots(Long proId, LocalDate date) {
-        // Valida os parâmetros
+        
+        // Valida os parâmetros, proId: ID do profissional
         if (proId == null || date == null) {
             throw new RuntimeException("ID do profissional e data não podem ser nulos");
         }
@@ -73,14 +73,14 @@ public class ProfessionalScheduleService {
             LocalDateTime slotTime = date.atTime(hour, 0);
             boolean isAvailable = true;
 
-            // Verifica se o horário está ocupado (consultas)
+            // Verifica se o horário está ocupado (consultas: 1h)
             for (Appointment booked : bookedAppointments) {
                 if (booked.getDateTime().getHour() == hour) {
                     isAvailable = false;
                     break;
                 }
             }
-            // Verifica se o horário está ocupado (cirurgias 2 horas)
+            // Verifica se o horário está ocupado (cirurgias: 2h)
             if (isAvailable) {
                 for (Surgery surgery : bookedSurgeries) {
                     LocalDateTime surgeryStart = surgery.getDateTime();
@@ -132,7 +132,7 @@ public class ProfessionalScheduleService {
         List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
                 healthPro, startOfDay, endOfDay);
                 
-        // Cria slots disponíveis (08:00 a 17:00, já que o último slot começa às 17:00)
+        // Cria slots disponíveis (08:00 a 17:00)
         List<Appointment> freeAppointments = new ArrayList<>();
         for (int hour = 8; hour < 18; hour++) {
             LocalDateTime slotTime = date.atTime(hour, 0);
@@ -146,7 +146,7 @@ public class ProfessionalScheduleService {
                 }
             }
 
-            // Verifica se o horário está ocupado (cirurgias 2horas)
+            // Verifica se o horário está ocupado (cirurgias, 2h)
             if (isAvailable) {
                 for (Surgery surgery : bookedSurgeries) {
                     LocalDateTime surgeryStart = surgery.getDateTime();
@@ -171,7 +171,7 @@ public class ProfessionalScheduleService {
             }
         }
 
-        // Cria o DTO de resposta
+        // Resposta 
         ProfessionalScheduleDto response = new ProfessionalScheduleDto();
         response.setHealthProfessionalId(proId);
         response.setDate(date);

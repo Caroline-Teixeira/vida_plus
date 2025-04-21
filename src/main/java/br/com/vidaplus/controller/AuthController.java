@@ -38,6 +38,7 @@ public class AuthController {
         this.auditRecordService = auditRecordService;
     }
 
+    // POST para login
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(@RequestBody Map<String, String> loginRequest) {
         String email = loginRequest.get("email");
@@ -67,7 +68,7 @@ public class AuthController {
             roles.add(role.getName().toString());
         }
 
-        // Define o tempo de expiração do token (7 dias)
+        // Tempo de expiração do token (7 dias)
         long expirationTime = 7 * 24 * 60 * 60 * 1000L; // 7 dias em milissegundos
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
 
@@ -77,7 +78,7 @@ public class AuthController {
             .setIssuedAt(new Date())
             .setExpiration(expirationDate)
             .claim("roles", roles)
-            .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())) // Nova API para assinatura
+            .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())) // API para assinatura
             .compact();
 
         // Retorna o token na resposta
@@ -86,6 +87,7 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    // POST para logout
     @PostMapping("/logout")
     public ResponseEntity<Map<String, String>> logout(@RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
         String email = "unknown_user"; // Valor padrão

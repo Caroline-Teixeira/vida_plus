@@ -67,7 +67,7 @@ public class MedicalRecordService {
 
     // Adiciona observações da consulta
     public void addObservations(MedicalRecord medicalRecord, Appointment appointment, String observations) {
-        // Lança exceção se observations for null
+        
         if (observations == null) {
             throw new IllegalArgumentException("Observações não podem ser nulas.");
         }
@@ -77,7 +77,7 @@ public class MedicalRecordService {
             return;
         }
 
-        // Formata a observação com appointmentId, data e texto
+        // Formatação com appointmentId, data e texto
         String dateTime = appointment.getDateTime().format(DATE_TIME_FORMATTER);
         String formattedObservation = appointment.getId() + " | " + dateTime + " | " + observations;
 
@@ -89,11 +89,11 @@ public class MedicalRecordService {
             medicalRecord.setObservations(currentObservations + " || " + formattedObservation);
         }
 
-        // Salva o MedicalRecord atualizado
+        // Salva
         medicalRecordRepository.save(medicalRecord);
     }
 
-    // método para adicionar observações de cirurgias
+    // Adiciona observações da cirurgia = mesmo método de addObservations
     public void addSurgeryObservations(MedicalRecord medicalRecord, Surgery surgery, String observations) {
         if (observations == null) {
             throw new IllegalArgumentException("Observações não podem ser nulas.");
@@ -129,7 +129,7 @@ public class MedicalRecordService {
             throw new IllegalArgumentException("Nenhum ID de consulta fornecido.");
         }
 
-        // Usa a data atual para a nova observação
+        // Data atual
         String dateTime = appointment.getDateTime().format(DATE_TIME_FORMATTER);
 
         // Obtém as observações existentes
@@ -147,16 +147,16 @@ public class MedicalRecordService {
             String[] observationEntries = currentObservations.split(" \\|\\| ");
             boolean updated = false;
 
-            // Itera sobre as entradas existentes
             for (String entry : observationEntries) {
                 String[] parts = entry.split(" \\| ", 3);
                 if (parts.length < 3) {
                     continue; // Ignora entradas mal formatadas
                 }
 
-                Long entryAppointmentId;
+                Long entryAppointmentId; // ID da consulta na entrada
+
                 try {
-                    entryAppointmentId = Long.parseLong(parts[0].trim());
+                    entryAppointmentId = Long.parseLong(parts[0].trim()); 
                 } catch (NumberFormatException e) {
                     updatedEntries.add(entry); // Mantém entradas mal formatadas
                     continue;
@@ -164,7 +164,7 @@ public class MedicalRecordService {
 
                 // Verifica se a entrada corresponde a um dos appointmentIds fornecidos
                 if (appointmentIds.contains(entryAppointmentId)) {
-                    // Atualiza a observação para este appointmentId
+                    // Atualiza a observação
                     String formattedObservation = entryAppointmentId + " | " + dateTime + " | " + newObservations;
                     updatedEntries.add(formattedObservation);
                     updated = true;
@@ -174,7 +174,7 @@ public class MedicalRecordService {
                 }
             }
 
-            // Se não encontrou uma entrada para algum appointmentId, adiciona uma nova
+            // Se não encontrou uma entrada, adiciona uma nova
             if (!updated) {
                 for (Long appointmentId : appointmentIds) {
                     String formattedObservation = appointmentId + " | " + dateTime + " | " + newObservations;
@@ -189,7 +189,7 @@ public class MedicalRecordService {
     }
 
 
-    // método para atualizar observações de cirurgias
+    // Atualiza observações de cirurgias = mesmo método de updateObservations
     @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
     public void updateSurgeryObservations(MedicalRecord medicalRecord, List<Long> surgeryIds, String newObservations, Surgery surgery) {
         if (newObservations == null || newObservations.trim().isEmpty()) {
@@ -260,7 +260,6 @@ public class MedicalRecordService {
         MedicalRecord medicalRecord = medicalRecordOptional.get();
         String observations = medicalRecord.getObservations();
 
-        // Se não houver observações, retorna 0
         if (observations == null || observations.trim().isEmpty()) {
             return 0;
         }
@@ -300,7 +299,7 @@ public class MedicalRecordService {
         return removedEntries;
     }
 
-    // método para remover observações de cirurgias
+    // Remove observações de cirurgias = mesmo método de removeObservationEntries
     @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
     public int removeSurgeryObservationEntries(User patient, List<Long> surgeryIds) {
         Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);

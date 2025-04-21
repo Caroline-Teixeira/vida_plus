@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        // Verifica se o cabeçalho Authorization está presente e começa com "Bearer "
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("Nenhum token JWT encontrado no cabeçalho Authorization");
@@ -48,15 +49,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7); // Remove o prefixo "Bearer "
         System.out.println("Token JWT recebido: " + token);
 
         try {
             Claims claims = Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes())) // Chave secreta para assinar o token
+                .build()  // Cria o parser
+                .parseClaimsJws(token)  // Faz o parse do token
+                .getBody();  // Extrai os claims do token
 
             String email = claims.getSubject();
             if (email == null) {
@@ -66,12 +67,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             System.out.println("Email extraído do token: " + email);
 
-            User user = userRepository.findByEmail(email)
+            User user = userRepository.findByEmail(email) // Busca o usuário pelo email
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
             System.out.println("Usuário encontrado: " + user.getEmail());
 
+            // Verifica se o usuário está ativo
             List<GrantedAuthority> authorities = new ArrayList<>();
             System.out.println("Papéis associados ao usuário: " + user.getRoles());
+            
+            // Adiciona os papéis do usuário às autoridades
             for (AllRole role : user.getRoles()) {
                 String roleName = role.getName().toString();
                 System.out.println("Adicionando autoridade: " + roleName);
@@ -80,6 +84,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             System.out.println("Autoridades configuradas para o usuário " + email + ": " + authorities);
 
+            // Cria a autenticação
             UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(user, null, authorities);
             authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

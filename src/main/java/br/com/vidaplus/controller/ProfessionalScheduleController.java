@@ -54,7 +54,7 @@ public class ProfessionalScheduleController {
     }
     
 
-    // POST Verifica os horários disponíveis
+    // POST Verifica os horários disponíveis em determinada data
     @PostMapping("/available-slots")
     public ResponseEntity<ProfessionalScheduleDto> getAvailableSlots(@RequestBody ProfessionalScheduleDto request) {
         try {

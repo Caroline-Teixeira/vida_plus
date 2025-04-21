@@ -2,16 +2,19 @@
 async function fetchApi(url, method = "GET", body = null) {
     const headers = { "Content-Type": "application/json" };
     const options = { method, headers };
+    
     if (body) options.body = JSON.stringify(body);
     console.log(`[Login] Enviando requisição para ${url} com método ${method}`);
     console.log("[Login] Corpo da requisição:", body);
     const response = await fetch(url, options);
     console.log(`[Login] Resposta de ${url}: Status ${response.status}`);
+
     if (!response.ok) {
         const errorText = await response.text();
         console.error("[Login] Detalhes do erro:", errorText);
         throw new Error(`Erro ${response.status}: ${response.statusText}`);
     }
+
     const data = await response.json();
     console.log("[Login] Dados recebidos:", JSON.stringify(data, null, 2));
     return data;

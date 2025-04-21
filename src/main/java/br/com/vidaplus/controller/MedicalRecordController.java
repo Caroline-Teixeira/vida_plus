@@ -75,7 +75,7 @@ public class MedicalRecordController {
         }
     }
 
-    // POST - adicionar observações de consultas ao prontuário
+    // POST adiciona observações de consultas ao prontuário
     @PostMapping("/{patientId}/add-observations")
     public ResponseEntity<String> addObservations(
             @PathVariable Long patientId,
@@ -120,7 +120,7 @@ public class MedicalRecordController {
         }
     }
 
-    // POST para adicionar observações de cirurgias
+    // POST adiciona observações de cirurgias
     @PostMapping("/{patientId}/add-surgery-observations")
     public ResponseEntity<String> addSurgeryObservations(
             @PathVariable Long patientId,
@@ -160,7 +160,7 @@ public class MedicalRecordController {
         }
     }
 
-    // Método PUT para atualizar observações das consultas
+    // PUT para atualizar observações das consultas
     @PutMapping("/{patientId}/update-observations")
     public ResponseEntity<String> updateObservations(
             @PathVariable Long patientId,
@@ -220,7 +220,6 @@ public class MedicalRecordController {
 
             MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
 
-            // Busca a primeira cirurgia para obter a data
             Long surgeryId = medicalRecordDto.getSurgeryIds().get(0);
             Optional<Surgery> surgeryOptional = surgeryRepository.findById(surgeryId);
             if (!surgeryOptional.isPresent()) {

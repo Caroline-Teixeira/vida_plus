@@ -7,6 +7,7 @@ import br.com.vidaplus.model.User;
 
 public class MedicalRecordDto {
 
+    // Atributos
     private Long id;
     private User patient;
     private List<Long> appointmentIds;

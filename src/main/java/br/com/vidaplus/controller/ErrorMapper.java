@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 
-// para tratamento de erros http
+// Controller para tratamento de erros http
 @ControllerAdvice
 public class ErrorMapper {
  

@@ -24,7 +24,7 @@
 
 .scrollable-container {
     max-height: 300px; /* Define uma altura fixa para ativar a scrollbar */
-    overflow-y: auto; /* Ativa a scrollbar vertical */
+    overflow-y: auto; /* scrollbar vertical */
     background-color: #fff;
     padding: 15px;
     border-radius: 5px;
@@ -32,9 +32,9 @@
     margin-bottom: 20px;
 }
 
-/* Estilo específico para a seção de observações no prontuário */
+/* Estilo específico para a seção de observações*/
 .observacoes-container {
-    max-height: 200px; /* Altura menor para observações, ajustável conforme necessário */
+    max-height: 200px; /*ajustável conforme necessário */
 }
 
 .appointment-item,

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.Appointment;
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Profile;
 import br.com.vidaplus.model.Surgery;
@@ -48,7 +48,7 @@ public class SurgeryService {
         this.hospitalizationService = hospitalizationService;
     }
 
-    // Método para buscar todas as cirurgias
+    // Lista todas as cirurgias
     public List<Surgery> getAllSurgeries() {
         try {
             System.out.println("Buscando todas as cirurgias...");
@@ -61,12 +61,12 @@ public class SurgeryService {
         }
     }
 
-    // Método para buscar uma cirurgia por ID
+    // Busca uma cirurgia por ID
     public Optional<Surgery> getSurgeryById(Long id) {
         return surgeryRepository.findById(id);
     }
 
-    // Métodos para buscar cirurgias por paciente ou profissional de saúde
+    // Busca cirurgias por paciente 
     public List<Surgery> getSurgeriesByPatient(Long patientId) {
         User patient = userRepository.findById(patientId).orElse(null);
         if (patient != null) {
@@ -76,7 +76,7 @@ public class SurgeryService {
         }
     }
 
-    // Método para buscar cirurgias por profissional de saúde
+    // Busca cirurgias por profissional de saúde
     public List<Surgery> getSurgeriesByHealthProfessional(Long healthProfessionalId) {
         User healthProfessional = userRepository.findById(healthProfessionalId).orElse(null);
         if (healthProfessional != null) {
@@ -86,7 +86,7 @@ public class SurgeryService {
         }
     }
 
-    // Método para buscar cirurgias do usuário atual
+    // Busca cirurgias do usuário atual
     public List<Surgery> getSurgeriesByCurrentUser() {
         try {
             User currentUser = userService.getCurrentAuthenticatedUser();
@@ -101,7 +101,7 @@ public class SurgeryService {
         }
     }
 
-    // Método para agendar uma cirurgia
+    // Agendamento de cirurgias = mesma lógica de consultas
     public Surgery scheduleSurgery(Long patientId, Long healthProfessionalId, 
                                   LocalDateTime dateTime, String reason, 
                                   String bed, String observations) {
@@ -143,7 +143,7 @@ public class SurgeryService {
         List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
             healthProfessional, startOfDay, endOfDay);
         for (Surgery existingSurgery : bookedSurgeries) {
-            if (existingSurgery.getStatus() != AppointmentStatus.CANCELLED) {
+            if (existingSurgery.getStatus() != EventStatus.CANCELLED) {
                 int existingHour = existingSurgery.getDateTime().getHour();
                 int newHour = dateTime.getHour();
                 // Verifica se há sobreposição nos intervalos de 2 horas
@@ -160,21 +160,21 @@ public class SurgeryService {
         surgery.setPatient(patient);
         surgery.setHealthProfessional(healthProfessional);
         surgery.setDateTime(dateTime);
-        surgery.setStatus(AppointmentStatus.SCHEDULED);
+        surgery.setStatus(EventStatus.SCHEDULED);
         surgery.setReason(reason);
         surgery.setBed(bed);
         surgery.setMedicalRecord(medicalRecord);
 
         Surgery savedSurgery = surgeryRepository.save(surgery);
 
-        // internação
+        // internação pra controle
         hospitalizationService.createHospitalizationForSurgery(savedSurgery);
 
         return savedSurgery;
     }
 
-    // Método pra atualizar status da cirurgia
-    public Surgery updateSurgeryStatus(Long surgeryId, AppointmentStatus status) {
+    // Atualiza o status da cirurgia
+    public Surgery updateSurgeryStatus(Long surgeryId, EventStatus status) {
         try {
             if (surgeryId == null) {
                 throw new RuntimeException("ID da cirurgia não pode ser nulo");
@@ -188,13 +188,18 @@ public class SurgeryService {
             }
             Surgery surgery = surgeryOptional.get();
             surgery.setStatus(status);
-            return surgeryRepository.save(surgery);
+            Surgery updatedSurgery = surgeryRepository.save(surgery);
+    
+            // Atualizar o status da internação associada
+            hospitalizationService.updateHospitalizationStatus(updatedSurgery);
+    
+            return updatedSurgery;
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao atualizar status da cirurgia com ID " + surgeryId + ": " + e.getMessage());
         }
     }
 
-    // Método pra atualizar cirurgia
+    // Atualiza a cirurgia
     public Surgery updateSurgery(Long id, Long patientId, Long healthProfessionalId, 
                                 LocalDateTime dateTime, String reason, 
                                 String bed, String observations) {
@@ -248,7 +253,7 @@ public class SurgeryService {
                 if (existingSurgery.getId().equals(id)) {
                     continue; // Ignora a própria cirurgia sendo atualizada
                 }
-                if (existingSurgery.getStatus() != AppointmentStatus.CANCELLED) {
+                if (existingSurgery.getStatus() != EventStatus.CANCELLED) {
                     int existingHour = existingSurgery.getDateTime().getHour();
                     int newHour = dateTime.getHour();
                     // Verifica se há sobreposição nos intervalos de 2 horas
@@ -271,7 +276,7 @@ public class SurgeryService {
             
             Surgery savedSurgery = surgeryRepository.save(surgery);
 
-            // internação
+            // internação para controle
             hospitalizationService.createHospitalizationForSurgery(savedSurgery);
 
             return savedSurgery;
@@ -281,7 +286,7 @@ public class SurgeryService {
         }
     }
 
-    // para deletar a cirugia
+    // Deleta a cirugia
     public void deleteSurgery(Long id) {
         try {
             if (id == null) {
@@ -291,6 +296,12 @@ public class SurgeryService {
             if (!surgeryOptional.isPresent()) {
                 throw new RuntimeException("Cirurgia não encontrada: " + id);
             }
+            Surgery surgery = surgeryOptional.get();
+    
+            // Deletar a internação associada à cirurgia
+            hospitalizationService.deleteBySurgery(surgery);
+    
+            // Deleta a cirurgia
             surgeryRepository.deleteById(id);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao deletar cirurgia com ID " + id + ": " + e.getMessage());

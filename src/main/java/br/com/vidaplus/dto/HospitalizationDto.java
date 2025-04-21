@@ -1,19 +1,20 @@
 package br.com.vidaplus.dto;
 
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 
 public class HospitalizationDto {
 
+    // Atributos
     private Long id;
     private Long surgeryId;
     private String bed;
-    private AppointmentStatus status;
+    private EventStatus status;
 
     // Construtores
     public HospitalizationDto() {
     }
 
-    public HospitalizationDto(Long id, Long surgeryId, String bed, AppointmentStatus status) {
+    public HospitalizationDto(Long id, Long surgeryId, String bed, EventStatus status) {
         this.id = id;
         this.surgeryId = surgeryId;
         this.bed = bed;
@@ -45,11 +46,11 @@ public class HospitalizationDto {
         this.bed = bed;
     }
 
-    public AppointmentStatus getStatus() {
+    public EventStatus getStatus() {
         return status;
     }
 
-    public void setStatus(AppointmentStatus status) {
+    public void setStatus(EventStatus status) {
         this.status = status;
     }
 }

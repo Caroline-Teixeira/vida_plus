@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import br.com.vidaplus.model.User;
 
-// pra enxugar lista de dados no POSTMAN
+// pra enxugar lista de dados no POSTMAN (id)
 
 public class UserIdSerializer extends JsonSerializer<User> {
     @Override

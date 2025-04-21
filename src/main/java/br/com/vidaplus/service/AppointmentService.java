@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.Appointment;
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.model.AppointmentType;
 import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Profile;
@@ -64,7 +64,7 @@ public class AppointmentService {
         return appointmentRepository.findById(id);
     }
     
-    // consulta por paciente
+    // Busca consulta por paciente
     public List<Appointment> getAppointmentsByPatient(Long patientId){
         User patient = userRepository.findById(patientId).orElse(null);
         if (patient != null){
@@ -75,7 +75,7 @@ public class AppointmentService {
         }
     }
 
-    // consulta por profissional
+    // Busca consulta por profissional
     public List<Appointment> getAppointmentsByHealthProfessional(Long healthProfessionalId) {
         User healthProfessional = userRepository.findById(healthProfessionalId).orElse(null);
         if (healthProfessional != null) {
@@ -85,17 +85,17 @@ public class AppointmentService {
         }
     }
 
-    // consulta do usuário atual
+    // Busca a(s) consulta(s) do usuário atual
     public List<Appointment> getAppointmentsByCurrentUser() {
     try {
         // Obtém o usuário autenticado
         User currentUser = userService.getCurrentAuthenticatedUser();
 
-        // Busca consultas como paciente e como profissional de saúde
+        // Busca consultas do paciente e do profissional de saúde
         List<Appointment> appointmentsAsPatient = appointmentRepository.findByPatient(currentUser);
         List<Appointment> appointmentsAsProfessional = appointmentRepository.findByHealthProfessional(currentUser);
 
-        // Combina as listas em um Set para evitar duplicatas
+        // Set para evitar duplicatas
         Set<Appointment> allAppointments = new HashSet<>();
         allAppointments.addAll(appointmentsAsPatient);
         allAppointments.addAll(appointmentsAsProfessional);
@@ -106,7 +106,7 @@ public class AppointmentService {
     }
 }
 
-    // Marcar consulta
+    // Marca a consulta
     public Appointment scheduleAppointment(Long patientId, Long healthProfessionalId, 
                                         LocalDateTime dateTime, AppointmentType type, 
                                         String reason, String observations) {
@@ -167,7 +167,7 @@ public class AppointmentService {
         appointment.setHealthProfessional(healthProfessional);
         appointment.setDateTime(dateTime);
         appointment.setType(type);
-        appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setStatus(EventStatus.SCHEDULED);
         appointment.setReason(reason);
         appointment.setMedicalRecord(medicalRecord); // Linka o prontuário com a consulta
         
@@ -175,7 +175,7 @@ public class AppointmentService {
     }
 
     // Atualiza o status da consulta
-    public Appointment updateAppointmentStatus(Long appointmentId, AppointmentStatus status) {
+    public Appointment updateAppointmentStatus(Long appointmentId, EventStatus status) {
         try {
             // Valida o ID
             if (appointmentId == null) {
@@ -205,7 +205,7 @@ public class AppointmentService {
         }
     }
 
-    // atualiza consulta
+    // Atualiza a consulta
     public Appointment updateAppointment(Long id, Long patientId, Long healthProfessionalId, 
                                    LocalDateTime dateTime, AppointmentType type, 
                                    String reason, String observations) {
@@ -279,7 +279,7 @@ public class AppointmentService {
         appointment.setReason(reason);
         appointment.setMedicalRecord(medicalRecord); // Linka
 
-        // Salva a consulta atualizada no banco
+        // Salva a consulta atualizada
         Appointment updatedAppointment = appointmentRepository.save(appointment);
         return updatedAppointment;
 
@@ -310,7 +310,4 @@ public class AppointmentService {
         }
     }
     
-
-    
-
 }

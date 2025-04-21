@@ -1,6 +1,6 @@
-// utils.js
+// Para traduções
 
-// Mapeamento de papéis para português
+// Perfils em portugues
 const roleTranslations = {
     "ADMIN": "Administrador",
     "PATIENT": "Paciente",
@@ -8,13 +8,13 @@ const roleTranslations = {
     "HEALTH_PROFESSIONAL": "Profissional de Saúde"
 };
 
-// Mapeamento de tipos de consulta para português
+// Tipos de consulta em português
 const appointmentTypeTranslations = {
     "IN_PERSON": "Presencial",
     "TELEMEDICINE": "Telemedicina"
 };
 
-// Mapeamento de status de consulta para português
+// Eventos em portugues
 const appointmentStatusTranslations = {
     "SCHEDULED": "Agendada",
     "CONFIRMED": "Confirmada",

@@ -2,17 +2,18 @@ package br.com.vidaplus.dto;
 
 import java.time.LocalDateTime;
 
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.model.AppointmentType;
 
 public class AppointmentDto {
 
+    // Atributos
     private Long id;
     private Long patientId;
     private Long healthProfessionalId;
     private LocalDateTime dateTime;
     private AppointmentType type;
-    private AppointmentStatus status;
+    private EventStatus status;
     private String reason;
     private Long medicalRecordId;
     private String observations;
@@ -51,10 +52,10 @@ public class AppointmentDto {
     public void setType(AppointmentType type) {
         this.type = type;
     }
-    public AppointmentStatus getStatus() {
+    public EventStatus getStatus() {
         return status;
     }
-    public void setStatus(AppointmentStatus status) {
+    public void setStatus(EventStatus status) {
         this.status = status;
     }
     public String getReason() {

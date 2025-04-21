@@ -80,12 +80,12 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); 
-            // Garante que o token JWT será validado antes de qualquer outra verificação de autenticação
+            // Garante que o token JWT será validado antes de qualquer autenticação
 
         return http.build();
     }
 
-    // Define o codificador de senhas - hash
+    // Codificador de senhas_hash
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

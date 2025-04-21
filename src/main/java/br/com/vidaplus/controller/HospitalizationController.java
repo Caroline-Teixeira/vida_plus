@@ -22,7 +22,7 @@ public class HospitalizationController {
         this.hospitalizationService = hospitalizationService;
     }
 
-    // GET Listar internações ativas
+    // GET Lista as internações ativas
     @GetMapping("/active")
     public ResponseEntity<List<HospitalizationDto>> getActiveHospitalizations() {
         try {
@@ -33,7 +33,7 @@ public class HospitalizationController {
         }
     }
 
-    // GET Listar leitos disponíveis
+    // GET Lista os leitos disponíveis
     @GetMapping("/available-beds")
     public ResponseEntity<List<String>> getAvailableBeds() {
         try {

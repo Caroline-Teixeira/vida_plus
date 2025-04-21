@@ -19,11 +19,11 @@ import br.com.vidaplus.model.User;
 import br.com.vidaplus.service.UserService;
 
 @RestController
-@RequestMapping("/api/users") // define o caminho
+@RequestMapping("/api/users") 
 public class UserController {
 
     private final UserService userService;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder; 
 
     @Autowired
     public UserController(UserService userService, BCryptPasswordEncoder passwordEncoder){
@@ -31,15 +31,14 @@ public class UserController {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // GET por Lista - todos os usuários
+    // GET lista todos os usuários
     @GetMapping
     public List<User> getAllUsers() {
         System.out.println("Método chamando método lista todos os usuários");
         List<User> users = userService.getAllUsers();
         System.out.println("Controller - Usuários retornados: " + users);
         return users;
-
-        
+  
     }
 
     // GET por id
@@ -52,10 +51,9 @@ public class UserController {
     @GetMapping("/current")
     public User getCurrentUser() {
         return userService.getCurrentAuthenticatedUser();
-}
+    }
 
-
-    //POST para registrar usuário
+    //POST para cadastrar um usuário
     @PostMapping
     public User registerUser(@RequestBody UserDto userDto) {
     // Verifica se o email e cpf existe
@@ -72,8 +70,8 @@ public class UserController {
         throw new RuntimeException("O campo 'roles' é obrigatório");
     }
 
-    // Converte UserDto para User e registra (exemplo implícito)
-    User user = new User(); // Você precisará preencher isso com os dados do userDto
+    // Converte UserDto para User e registra
+    User user = new User(); 
     user.setName(userDto.getName());
     user.setEmail(userDto.getEmail());
     user.setCpf(userDto.getCpf());
@@ -86,7 +84,7 @@ public class UserController {
     return userService.registerUser(user, userDto.getRoles());
     }
 
-    // Put pra atualizar um usuário
+    // PUT pra atualizar um usuário
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         User user = userService.getUserById(id).orElse(null);
@@ -94,14 +92,14 @@ public class UserController {
         if (user == null) {
             throw new RuntimeException("Usuário não encontrado: " + id);
         }
-        //System.out.println("Senha recebida: " + userDto.getPassword()); // Debug
+        
         
         user.setName(userDto.getName());
         user.setDateOfBirth(userDto.getDateOfBirth());
         user.setGender(userDto.getGender());
         user.setContact(userDto.getContact());
 
-        // Verifica se o CPF foi alterado e se já existe
+        // Verifica CPF existente
         if (userDto.getCpf() != null && !userDto.getCpf().isEmpty() && !user.getCpf().equals(userDto.getCpf())) {
             if (userService.existsByCpf(userDto.getCpf())) {
                 throw new RuntimeException("CPF existente: " + userDto.getCpf());
@@ -109,7 +107,7 @@ public class UserController {
             user.setCpf(userDto.getCpf());
         }
         
-        // Verifica se o email foi alterado e se já existe
+        // Verifica email existente
         if (!user.getEmail().equals(userDto.getEmail()) && userService.existsByEmail(userDto.getEmail())) {
             throw new RuntimeException("E-mail existente: " + userDto.getEmail());
         }

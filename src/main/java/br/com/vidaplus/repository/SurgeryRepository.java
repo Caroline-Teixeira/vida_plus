@@ -11,10 +11,13 @@ import br.com.vidaplus.model.User;
 
 @Repository
 public interface SurgeryRepository extends JpaRepository<Surgery, Long> {
+        
     List<Surgery> findByPatient(User patient);
     List<Surgery> findByHealthProfessional(User healthProfessional);
     List<Surgery> findByHealthProfessionalAndDateTimeBetween(
             User healthProfessional, LocalDateTime start, LocalDateTime end);
+            
+        // Para encontrar os agendamentos de um paciente em um intervalo de datas
     List<Surgery> findByPatientAndDateTimeBetween(
             User patient, LocalDateTime start, LocalDateTime end);
 }

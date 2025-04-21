@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 
 import br.com.vidaplus.model.MedicalRecord;
 
-// pra enxugar lista de dados no POSTMAN
+// pra 'enxugar' lista de dados no POSTMAN para prontuarios
 
 public class MedicalRecordIdSerializer extends JsonSerializer<MedicalRecord> {
     @Override

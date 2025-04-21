@@ -22,6 +22,7 @@ import lombok.NoArgsConstructor;
 public class ProfessionalSchedule {
     // agenda do profissional da saúde
 
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

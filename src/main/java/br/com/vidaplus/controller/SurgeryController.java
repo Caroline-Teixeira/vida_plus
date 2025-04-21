@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.SurgeryDto;
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.model.Surgery;
 import br.com.vidaplus.service.SurgeryService;
 
@@ -30,7 +30,7 @@ public class SurgeryController {
         this.surgeryService = surgeryService;
     }
 
-    // GET todas as cirurgias
+    // GET lista todas as cirurgias
     @GetMapping
     public ResponseEntity<List<Surgery>> getAllSurgeries() {
         try {
@@ -58,7 +58,7 @@ public class SurgeryController {
         }
     }
 
-    // GET cirurgia por paciente
+    // GET cirurgia por profissional de saúde
     @GetMapping("/healthProfessional/{healthProfessionalId}")
     public ResponseEntity<List<Surgery>> getSurgeriesByHealthProfessional(@PathVariable Long healthProfessionalId) {
         try {
@@ -69,13 +69,13 @@ public class SurgeryController {
         }
     }
 
-    // GET cirurgia do usuário logado
+    // GET lista cirurgias do usuário logado
     @GetMapping("/current")
     public List<Surgery> getCurrentUserSurgeries() {
         return surgeryService.getSurgeriesByCurrentUser();
     }
 
-    // POST agendar cirurgia
+    // POST agenda uma nova cirurgia
     @PostMapping
     public ResponseEntity<Surgery> scheduleSurgery(@RequestBody SurgeryDto surgeryDto) {
         try {
@@ -93,10 +93,10 @@ public class SurgeryController {
         }
     }
 
-    // PUT atualizar status da cirurgia
+    // PUT atualiza STATUS da cirurgia
     @PutMapping("/{id}/status")
     public ResponseEntity<Surgery> updateSurgeryStatus(
-            @PathVariable Long id, @RequestBody AppointmentStatus status) {
+            @PathVariable Long id, @RequestBody EventStatus status) {
         try {
             Surgery surgery = surgeryService.updateSurgeryStatus(id, status);
             return ResponseEntity.ok(surgery);
@@ -105,7 +105,7 @@ public class SurgeryController {
         }
     }
 
-    // PUT atualizar cirurgia
+    // PUT atualiza a cirurgia
     @PutMapping("/{id}")
     public ResponseEntity<Surgery> updateSurgery(
             @PathVariable Long id, @RequestBody SurgeryDto surgeryDto) {
@@ -125,7 +125,7 @@ public class SurgeryController {
         }
     }
 
-    // DELETE cirurgia
+    // DELETE exclui a cirurgia
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteSurgery(@PathVariable Long id) {
         try {

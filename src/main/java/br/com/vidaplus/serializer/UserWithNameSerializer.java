@@ -10,6 +10,8 @@ import br.com.vidaplus.model.User;
 
 public class UserWithNameSerializer extends StdSerializer<User> {
 
+    // Serialização de usuário com nome
+
     public UserWithNameSerializer() {
         this(null);
     }

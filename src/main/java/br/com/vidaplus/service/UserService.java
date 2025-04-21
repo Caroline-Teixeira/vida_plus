@@ -65,7 +65,7 @@ public class UserService {
         return users;
     }
     
-    // Usuário por id, email e cpf
+    // Procura usuário por id, email e cpf
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
     }
@@ -79,7 +79,7 @@ public class UserService {
     }
 
 
-    // Dados do usuário logado
+    // Lista dados do usuário logado
     public User getCurrentAuthenticatedUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
@@ -102,7 +102,7 @@ public class UserService {
     // Cadastra Usuário
     @Transactional
     public User registerUser(User user, Set<Profile> profiles){
-        // Cria um conjunto para os papéis
+        // Cria um conjunto para os perfis
         Set<AllRole> roles = new HashSet<>();
 
         // Para cada tipo de perfil, busca e adiciona ao conjunto
@@ -149,7 +149,4 @@ public class UserService {
         userRepository.deleteById(id);
     }
     
-    
-        
-
 }

@@ -7,7 +7,7 @@ function createDefaultMedicalRecord() {
         patient: { name: currentUserName || "Usuário Atual" },
         recordDate: formattedDate,
         appointments: [],
-        surgeries: [], // Adicionado para suportar a nova seção de cirurgias
+        surgeries: [], 
         observations: []
     };
 }

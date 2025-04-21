@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.AppointmentDto;
 import br.com.vidaplus.model.Appointment;
-import br.com.vidaplus.model.AppointmentStatus;
+import br.com.vidaplus.model.EventStatus;
 import br.com.vidaplus.service.AppointmentService;
 
 @RestController
@@ -31,7 +31,7 @@ public class AppointmentController {
 
     }
 
-// GET lista de consultas
+    // GET lista todas as consultas
     @GetMapping
     public ResponseEntity<List<Appointment>> getAllAppointments() {
         try {
@@ -42,13 +42,13 @@ public class AppointmentController {
         }
     }
 
-// GET lista de uma consulta
+    // GET busca consulta por id
     @GetMapping("/{id}")
     public Appointment getAppointmentById(@PathVariable Long id) {
         return appointmentService.getAppointmentById(id).orElse(null);
     }
 
-// GET consulta por paciente
+    // GET consulta por paciente
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByPatient(@PathVariable Long patientId) {
         try {
@@ -59,7 +59,7 @@ public class AppointmentController {
         }
     }
     
-// GET consulta por profissional
+    // GET consulta por profissional da saúde
     @GetMapping("/healthProfessional/{healthProfessionalId}")
     public ResponseEntity<List<Appointment>> getAppointmentsByHealthProfessional(@PathVariable Long healthProfessionalId) {
         try {
@@ -70,13 +70,13 @@ public class AppointmentController {
         }
     }
 
-// GET consulta do usuário atual
+    // GET consultas do usuário atual
     @GetMapping("/current")
     public List<Appointment> getCurrentUserAppointments() {
         return appointmentService.getAppointmentsByCurrentUser();
     }
 
-    // POST agendar consulta
+    // POST agendar nova consulta
     @PostMapping
     public ResponseEntity<Appointment> scheduleAppointment(@RequestBody AppointmentDto appointmentDto) {
         try {
@@ -96,10 +96,10 @@ public class AppointmentController {
         }
     }
     
-    // PUT atualizar Status da consulta
+    // PUT atualiza Status da consulta
     @PutMapping("/{id}/status")
     public ResponseEntity<Appointment> updateAppointmentStatus(
-            @PathVariable Long id, @RequestBody AppointmentStatus status) {
+            @PathVariable Long id, @RequestBody EventStatus status) {
         try {
             Appointment appointment = appointmentService.updateAppointmentStatus(id, status);
             return ResponseEntity.ok(appointment);
@@ -109,7 +109,7 @@ public class AppointmentController {
         }
     }
     
-    // PUT atualizar consulta
+    // PUT atualiza a consulta
     @PutMapping("/{id}")
     public ResponseEntity<Appointment> updateAppointment(
             @PathVariable Long id, @RequestBody AppointmentDto appointmentDto) {
@@ -131,7 +131,7 @@ public class AppointmentController {
         }
     }
     
-    // DELETE pra cancelar consultas
+    // DELETE excluir consulta
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAppointment(@PathVariable Long id) {
         try {

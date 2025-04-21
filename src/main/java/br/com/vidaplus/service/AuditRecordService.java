@@ -38,12 +38,13 @@ public class AuditRecordService {
         }
     }
 
-    // Novo método sobrecarregado para registrar ação usando o usuário autenticado
+    // Método sobrecarregado para registrar ação usando o usuário autenticado
     public void logAction(String action) {
         try {
             // Obtém o usuário autenticado
             User currentUser = userService.getCurrentAuthenticatedUser();
             // Registra a ação usando o email do usuário
+            
             logAction(currentUser.getEmail(), action);
         } catch (Exception e) {
             throw new RuntimeException("Erro ao registrar ação de auditoria para o usuário atual: " + e.getMessage());

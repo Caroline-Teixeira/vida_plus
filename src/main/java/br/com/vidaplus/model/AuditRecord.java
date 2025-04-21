@@ -15,13 +15,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class AuditRecord {
-
+    // Ações de auditoria no sistema
+    
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String username; 
-    private String action;   // (ex.: "LOGIN", "LOGOUT", "ACCESS_PAGE")
+    private String action;   // (ex.: "LOGIN", "LOGOUT"))
     private LocalDateTime timestamp; 
 
     

@@ -8,6 +8,7 @@ import br.com.vidaplus.model.Surgery;
 
 public class ProfessionalScheduleDto {
 
+    // Atributos
     private Long id;
     private Long healthProfessionalId;
     private LocalDate date;
@@ -16,7 +17,7 @@ public class ProfessionalScheduleDto {
     private List<Appointment> bookedSlots;
     private List<Surgery> bookedSurgeries;
 
-    // Construtores
+    // Construtor
     public ProfessionalScheduleDto() {
     }
 

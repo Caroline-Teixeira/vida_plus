@@ -19,7 +19,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // Adiona os papeis no banco, sem o prefixo ROLE_ Só insere se a tabela estiver vazia
+        // Adiciona os papeis no banco de dados, sem o prefixo ROLE_ caso a tabela estiver vazia
+        
         if (allRoleRepository.count() == 0) {
             Arrays.asList(Profile.values()).forEach(profile -> {
                 AllRole role = new AllRole();

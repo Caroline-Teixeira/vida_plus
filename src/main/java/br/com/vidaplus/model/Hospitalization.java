@@ -14,6 +14,9 @@ import lombok.Data;
 @Data
 public class Hospitalization {
 
+    // Controle de fluxo de internação
+
+    // Atributos
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +28,7 @@ public class Hospitalization {
     private String bed;
 
     @Enumerated(EnumType.STRING)
-    private AppointmentStatus status;
+    private EventStatus status;
 
 
 }
