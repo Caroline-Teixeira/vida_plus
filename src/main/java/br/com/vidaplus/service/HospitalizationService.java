@@ -39,6 +39,30 @@ public class HospitalizationService {
         this.hospitalizationRepository = hospitalizationRepository;
     }
 
+    public Hospitalization findBySurgery(Surgery surgery) {
+        return hospitalizationRepository.findBySurgery(surgery);
+    }
+
+    public void updateHospitalization(Hospitalization hospitalization, String bed, EventStatus status) {
+        // Verifica se o leito é válido
+        boolean isValidBed = AVAILABLE_BEDS.contains(bed);
+        if (!isValidBed) {
+            throw new RuntimeException("Leito inválido: " + bed);
+        }
+
+        // Verifica se o novo leito está ocupado por outra internação ativa
+        List<Hospitalization> activeHospitalizations = hospitalizationRepository.findByBedAndStatusIn(bed, ACTIVE_STATUSES);
+        for (Hospitalization active : activeHospitalizations) {
+            if (!active.getSurgery().getId().equals(hospitalization.getSurgery().getId())) {
+                throw new RuntimeException("Leito ocupado: " + bed);
+            }
+        }
+
+        hospitalization.setBed(bed);
+        hospitalization.setStatus(status);
+        hospitalizationRepository.save(hospitalization);
+    }
+
     // Cria a internação automaticamente ao agendar cirurgia
     public Hospitalization createHospitalizationForSurgery(Surgery surgery) {
         String bed = surgery.getBed();

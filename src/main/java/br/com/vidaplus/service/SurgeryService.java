@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import br.com.vidaplus.model.AllRole;
 import br.com.vidaplus.model.Appointment;
 import br.com.vidaplus.model.EventStatus;
+import br.com.vidaplus.model.Hospitalization;
 import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Profile;
 import br.com.vidaplus.model.Surgery;
@@ -200,92 +201,98 @@ public class SurgeryService {
     }
 
     // Atualiza a cirurgia
-    public Surgery updateSurgery(Long id, Long patientId, Long healthProfessionalId, 
-                                LocalDateTime dateTime, String reason, 
-                                String bed, String observations) {
-        try {
-            Optional<Surgery> surgeryOptional = surgeryRepository.findById(id);
-            if (!surgeryOptional.isPresent()) {
-                throw new RuntimeException("Cirurgia não encontrada: " + id);
-            }
-            Surgery surgery = surgeryOptional.get();
-
-            Optional<User> patientOptional = userRepository.findById(patientId);
-            if (!patientOptional.isPresent()) {
-                throw new RuntimeException("Paciente não encontrado: " + patientId);
-            }
-            User patient = patientOptional.get();
-
-            Optional<User> healthProfessionalOptional = userRepository.findById(healthProfessionalId);
-            if (!healthProfessionalOptional.isPresent()) {
-                throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
-            }
-            User healthProfessional = healthProfessionalOptional.get();
-
-            boolean isHealthProfessional = false;
-            for (AllRole role : healthProfessional.getRoles()) {
-                if (role.getName() == Profile.HEALTH_PROFESSIONAL) {
-                    isHealthProfessional = true;
-                    break;
-                }
-            }
-
-            if (!isHealthProfessional) {
-                throw new RuntimeException("Usuário não é Profissional da Saúde.");
-            }
-
-            // Verifica conflitos com consultas existentes
-            LocalDateTime startOfDay = dateTime.toLocalDate().atStartOfDay();
-            LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
-            List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
-                healthProfessional, startOfDay, endOfDay);
-            for (Appointment booked : bookedAppointments) {
-                int bookedHour = booked.getDateTime().getHour();
-                if (bookedHour == dateTime.getHour() || bookedHour == dateTime.getHour() + 1) {
-                    throw new RuntimeException("Horário indisponível, escolha outro horário");
-                }
-            }
-
-           // Verifica conflitos com cirurgias existentes
-           List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
-            healthProfessional, startOfDay, endOfDay);
-            for (Surgery existingSurgery : bookedSurgeries) {
-                if (existingSurgery.getId().equals(id)) {
-                    continue; // Ignora a própria cirurgia sendo atualizada
-                }
-                if (existingSurgery.getStatus() != EventStatus.CANCELLED) {
-                    int existingHour = existingSurgery.getDateTime().getHour();
-                    int newHour = dateTime.getHour();
-                    // Verifica se há sobreposição nos intervalos de 2 horas
-                    if ((newHour >= existingHour && newHour < existingHour + 2) || 
-                        (existingHour >= newHour && existingHour < newHour + 2)) {
-                        throw new RuntimeException("Horário indisponível. Escolha outro horário");
-                    }
-                }
-            }
-
-            MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
-
-            surgery.setPatient(patient);
-            surgery.setHealthProfessional(healthProfessional);
-            surgery.setDateTime(dateTime);
-            surgery.setReason(reason);
-            surgery.setBed(bed);
-            surgery.setMedicalRecord(medicalRecord);
-
-            
-            Surgery savedSurgery = surgeryRepository.save(surgery);
-
-            // internação para controle
-            hospitalizationService.createHospitalizationForSurgery(savedSurgery);
-
-            return savedSurgery;
-
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao atualizar cirurgia: " + e.getMessage());
+   public Surgery updateSurgery(Long id, Long patientId, Long healthProfessionalId, 
+                             LocalDateTime dateTime, String reason, 
+                             String bed, String observations) {
+    try {
+        Optional<Surgery> surgeryOptional = surgeryRepository.findById(id);
+        if (!surgeryOptional.isPresent()) {
+            throw new RuntimeException("Cirurgia não encontrada: " + id);
         }
-    }
+        Surgery surgery = surgeryOptional.get();
 
+        Optional<User> patientOptional = userRepository.findById(patientId);
+        if (!patientOptional.isPresent()) {
+            throw new RuntimeException("Paciente não encontrado: " + patientId);
+        }
+        User patient = patientOptional.get();
+
+        Optional<User> healthProfessionalOptional = userRepository.findById(healthProfessionalId);
+        if (!healthProfessionalOptional.isPresent()) {
+            throw new RuntimeException("Profissional da Saúde não encontrado: " + healthProfessionalId);
+        }
+        User healthProfessional = healthProfessionalOptional.get();
+
+        boolean isHealthProfessional = false;
+        for (AllRole role : healthProfessional.getRoles()) {
+            if (role.getName() == Profile.HEALTH_PROFESSIONAL) {
+                isHealthProfessional = true;
+                break;
+            }
+        }
+
+        if (!isHealthProfessional) {
+            throw new RuntimeException("Usuário não é Profissional da Saúde.");
+        }
+
+        // Verifica conflitos com consultas existentes
+        LocalDateTime startOfDay = dateTime.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusSeconds(1);
+        List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Appointment booked : bookedAppointments) {
+            int bookedHour = booked.getDateTime().getHour();
+            if (bookedHour == dateTime.getHour() || bookedHour == dateTime.getHour() + 1) {
+                throw new RuntimeException("Horário indisponível, escolha outro horário");
+            }
+        }
+
+        // Verifica conflitos com cirurgias existentes
+        List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
+            healthProfessional, startOfDay, endOfDay);
+        for (Surgery existingSurgery : bookedSurgeries) {
+            if (existingSurgery.getId().equals(id)) {
+                continue; // Ignora a própria cirurgia sendo atualizada
+            }
+            if (existingSurgery.getStatus() != EventStatus.CANCELLED) {
+                int existingHour = existingSurgery.getDateTime().getHour();
+                int newHour = dateTime.getHour();
+                // Verifica se há sobreposição nos intervalos de 2 horas
+                if ((newHour >= existingHour && newHour < existingHour + 2) || 
+                    (existingHour >= newHour && existingHour < newHour + 2)) {
+                    throw new RuntimeException("Horário indisponível. Escolha outro horário");
+                }
+            }
+        }
+
+        MedicalRecord medicalRecord = medicalRecordService.findOrCreateMedicalRecord(patient);
+
+        // Atualiza os dados da cirurgia
+        surgery.setPatient(patient);
+        surgery.setHealthProfessional(healthProfessional);
+        surgery.setDateTime(dateTime);
+        surgery.setReason(reason);
+        surgery.setBed(bed);
+        surgery.setMedicalRecord(medicalRecord);
+
+        Surgery savedSurgery = surgeryRepository.save(surgery);
+
+        // Atualiza a internação existente em vez de criar uma nova
+        Hospitalization hospitalization = hospitalizationService.findBySurgery(savedSurgery);
+        if (hospitalization != null) {
+            // Atualiza os dados da internação usando o método do HospitalizationService
+            hospitalizationService.updateHospitalization(hospitalization, bed, savedSurgery.getStatus());
+        } else {
+            // Caso não exista uma internação (o que é improvável), cria uma nova
+            hospitalizationService.createHospitalizationForSurgery(savedSurgery);
+        }
+
+        return savedSurgery;
+
+    } catch (RuntimeException e) {
+        throw new RuntimeException("Erro ao atualizar cirurgia: " + e.getMessage());
+    }
+}
     // Deleta a cirugia
     public void deleteSurgery(Long id) {
         try {
