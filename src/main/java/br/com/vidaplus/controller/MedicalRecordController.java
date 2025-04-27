@@ -271,32 +271,28 @@ public class MedicalRecordController {
 
     // DELETE para remover observações de cirurgias
     @DeleteMapping("/{patientId}/remove-surgery-observations")
-    public ResponseEntity<String> removeSurgeryObservationEntries(
-            @PathVariable Long patientId,
-            @RequestBody MedicalRecordDto medicalRecordDto) {
-        
-        try {
-            if (medicalRecordDto.getSurgeryIds() == null || medicalRecordDto.getSurgeryIds().isEmpty()) {
-                throw new RuntimeException("Nenhum ID de cirurgia fornecido.");
-            }
-
-            Optional<User> patientOptional = userRepository.findById(patientId);
-            if (!patientOptional.isPresent()) {
-                throw new RuntimeException("Paciente não encontrado: " + patientId);
-            }
-            User patient = patientOptional.get();
-
-            int removedEntries = medicalRecordService.removeSurgeryObservationEntries(
-                patient, 
-                medicalRecordDto.getSurgeryIds()
-            );
-
-            return ResponseEntity.ok("Removidas " + removedEntries + " entradas de observações de cirurgias.");
-        } 
-        catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao remover entradas de observações de cirurgias para o paciente com id " + patientId + ": " + e.getMessage());
+public ResponseEntity<String> removeSurgeryObservationEntries(
+        @PathVariable Long patientId,
+        @RequestBody Map<String, LocalDateTime> dateRange) {
+    try {
+        Optional<User> patientOptional = userRepository.findById(patientId);
+        if (!patientOptional.isPresent()) {
+            throw new RuntimeException("Paciente não encontrado: " + patientId);
         }
+        User patient = patientOptional.get();
+
+        int removedEntries = medicalRecordService.removeSurgeryObservationEntries(
+            patient, 
+            dateRange.get("startDate"), 
+            dateRange.get("endDate")
+        );
+
+        return ResponseEntity.ok("Removidas " + removedEntries + " entradas de observações de cirurgias.");
+    } 
+    catch (RuntimeException e) {
+        throw new RuntimeException("Erro ao remover entradas de observações de cirurgias para o paciente com id " + patientId + ": " + e.getMessage());
     }
+}
 
     // DELETE para excluir prontuário completo
     @DeleteMapping("/{patientId}")

@@ -53,7 +53,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/surgeries/healthProfessional/{healthProfessionalId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.GET, "/api/medical-records/patient/{patientId}").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.POST, "/api/audit-records/filter").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/schedule/available-slots").hasAnyAuthority("ADMIN", "ATTENDANT", "HEALTH_PROFESSIONAL")
                 .requestMatchers(HttpMethod.POST, "/api/users").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.POST, "/api/appointments").hasAnyAuthority("ADMIN", "ATTENDANT")
                 .requestMatchers(HttpMethod.POST, "/api/surgeries").hasAnyAuthority("ADMIN", "ATTENDANT")

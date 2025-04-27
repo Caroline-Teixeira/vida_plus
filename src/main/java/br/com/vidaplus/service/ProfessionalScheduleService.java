@@ -44,11 +44,11 @@ public class ProfessionalScheduleService {
         
     }
 
-    // Verifica os horários disponíveis e agendados
-    @Transactional
-    public List<Appointment> getAvailableSlots(Long proId, LocalDate date) {
-        
-        // Valida os parâmetros, proId: ID do profissional
+    
+    // Verifica todos os slots (disponíveis e ocupados)
+    @Transactional(readOnly = true)
+    public ProfessionalScheduleDto getAllSlots(Long proId, LocalDate date, boolean availableOnly) {
+        // Valida os parâmetros
         if (proId == null || date == null) {
             throw new RuntimeException("ID do profissional e data não podem ser nulos");
         }
@@ -59,13 +59,13 @@ public class ProfessionalScheduleService {
             throw new RuntimeException("Profissional não encontrado");
         }
 
-        // Busca as consultas agendadas diretamente do AppointmentRepository
+        // Busca as consultas e cirurgias agendadas
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(23, 59, 59);
         List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
             healthPro, startOfDay, endOfDay);
         List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
-                healthPro, startOfDay, endOfDay);
+            healthPro, startOfDay, endOfDay);
 
         // Cria slots disponíveis (08:00 a 17:00)
         List<Appointment> freeAppointments = new ArrayList<>();
@@ -80,77 +80,11 @@ public class ProfessionalScheduleService {
                     break;
                 }
             }
+
             // Verifica se o horário está ocupado (cirurgias: 2h)
             if (isAvailable) {
                 for (Surgery surgery : bookedSurgeries) {
                     LocalDateTime surgeryStart = surgery.getDateTime();
-                   
-                    // Bloqueia slots que coincidem com o início da cirurgia ou o próximo horário
-                    if (slotTime.getHour() == surgeryStart.getHour() || 
-                        slotTime.getHour() == surgeryStart.getHour() + 1) {
-                        isAvailable = false;
-                        break;
-                    }
-                }
-            }
-
-
-
-            // Se o slot estiver disponível, adiciona à lista
-            if (isAvailable) {
-                Appointment freeSlot = new Appointment();
-                freeSlot.setHealthProfessional(healthPro);
-                freeSlot.setDateTime(slotTime);
-                freeSlot.setType(AppointmentType.IN_PERSON);
-                freeAppointments.add(freeSlot);
-            }
-        }
-
-        return freeAppointments;
-    }
-
-    // Verifica todos os slots (disponíveis e ocupados)
-    @Transactional(readOnly = true)
-    public ProfessionalScheduleDto getAllSlots(Long proId, LocalDate date) {
-        // Valida os parâmetros
-        if (proId == null || date == null) {
-            throw new RuntimeException("ID do profissional e data não podem ser nulos");
-        }
-
-        // Busca o profissional
-        User healthPro = userRepository.findById(proId).orElse(null);
-        if (healthPro == null) {
-            throw new RuntimeException("Profissional não encontrado");
-        }
-
-        // Busca as consultas agendadas diretamente do AppointmentRepository
-        LocalDateTime startOfDay = date.atStartOfDay();
-        LocalDateTime endOfDay = date.atTime(23, 59, 59);
-        
-        List<Appointment> bookedAppointments = appointmentRepository.findByHealthProfessionalAndDateTimeBetween(
-            healthPro, startOfDay, endOfDay);
-        List<Surgery> bookedSurgeries = surgeryRepository.findByHealthProfessionalAndDateTimeBetween(
-                healthPro, startOfDay, endOfDay);
-                
-        // Cria slots disponíveis (08:00 a 17:00)
-        List<Appointment> freeAppointments = new ArrayList<>();
-        for (int hour = 8; hour < 18; hour++) {
-            LocalDateTime slotTime = date.atTime(hour, 0);
-            boolean isAvailable = true;
-
-            // Verifica se o horário está ocupado (consultas)
-            for (Appointment booked : bookedAppointments) {
-                if (booked.getDateTime().getHour() == hour) {
-                    isAvailable = false;
-                    break;
-                }
-            }
-
-            // Verifica se o horário está ocupado (cirurgias, 2h)
-            if (isAvailable) {
-                for (Surgery surgery : bookedSurgeries) {
-                    LocalDateTime surgeryStart = surgery.getDateTime();
-                    
                     // Bloqueia slots que coincidem com o início da cirurgia ou o próximo horário
                     if (slotTime.getHour() == surgeryStart.getHour() || 
                         slotTime.getHour() == surgeryStart.getHour() + 1) {
@@ -166,18 +100,21 @@ public class ProfessionalScheduleService {
                 freeSlot.setHealthProfessional(healthPro);
                 freeSlot.setDateTime(slotTime);
                 freeSlot.setType(AppointmentType.IN_PERSON);
-                
                 freeAppointments.add(freeSlot);
             }
         }
 
-        // Resposta 
+        // Monta a resposta
         ProfessionalScheduleDto response = new ProfessionalScheduleDto();
         response.setHealthProfessionalId(proId);
         response.setDate(date);
         response.setAvailableSlots(freeAppointments);
-        response.setBookedSlots(bookedAppointments);
-        response.setBookedSurgeries(bookedSurgeries);
+
+        // Se availableOnly for false, inclui os slots ocupados
+        if (!availableOnly) {
+            response.setBookedSlots(bookedAppointments);
+            response.setBookedSurgeries(bookedSurgeries);
+        }
 
         // Busca a agenda apenas para preencher o ID, se existir
         Optional<ProfessionalSchedule> scheduleOpt = scheduleRepository.findByHealthProfessionalAndDate(healthPro, date);
@@ -197,7 +134,7 @@ public class ProfessionalScheduleService {
 
             // Usa o ID do usuário autenticado para buscar a agenda
             Long proId = currentUser.getId();
-            return getAllSlots(proId, date);
+            return getAllSlots(proId, date, false); // Retorna slots disponíveis e ocupados para o usuário atual
         } catch (Exception e) {
             throw new RuntimeException("Erro ao buscar a agenda do usuário atual: " + e.getMessage());
         }
@@ -229,7 +166,6 @@ public class ProfessionalScheduleService {
             throw new RuntimeException("Erro ao buscar as cirurgias agendadas do usuário atual: " + e.getMessage());
         }
     }
-
 
     
 }

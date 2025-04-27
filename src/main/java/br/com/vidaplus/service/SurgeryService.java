@@ -277,13 +277,13 @@ public class SurgeryService {
 
         Surgery savedSurgery = surgeryRepository.save(surgery);
 
-        // Atualiza a internação existente em vez de criar uma nova
+        // Atualiza a internação existente 
         Hospitalization hospitalization = hospitalizationService.findBySurgery(savedSurgery);
         if (hospitalization != null) {
-            // Atualiza os dados da internação usando o método do HospitalizationService
+            // Atualiza os dados da internação 
             hospitalizationService.updateHospitalization(hospitalization, bed, savedSurgery.getStatus());
         } else {
-            // Caso não exista uma internação (o que é improvável), cria uma nova
+            // Caso não exista uma internação, cria uma nova
             hospitalizationService.createHospitalizationForSurgery(savedSurgery);
         }
 

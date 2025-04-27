@@ -1,19 +1,19 @@
 package br.com.vidaplus.controller;
 
 import java.time.LocalDate;
-import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.vidaplus.dto.ProfessionalScheduleDto;
-import br.com.vidaplus.model.Appointment;
+
 import br.com.vidaplus.service.ProfessionalScheduleService;
 
 @RestController
@@ -29,15 +29,16 @@ public class ProfessionalScheduleController {
 
     //GET Verifica todos os slots (disponíveis e ocupados) 
     @GetMapping("/all-slots/{professionalId}/{date}")
-    public ResponseEntity<ProfessionalScheduleDto> getAllSlots(
+    public ResponseEntity<ProfessionalScheduleDto> getSlots(
             @PathVariable("professionalId") Long proId,
-            @PathVariable("date") String date) {
+            @PathVariable("date") String date,
+            @RequestParam(value = "availableOnly", defaultValue = "false") boolean availableOnly) {
         try {
             LocalDate parsedDate = LocalDate.parse(date);
-            ProfessionalScheduleDto response = scheduleService.getAllSlots(proId, parsedDate);
+            ProfessionalScheduleDto response = scheduleService.getAllSlots(proId, parsedDate, availableOnly);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            throw new RuntimeException("Erro ao buscar slots disponíveis e ocupados: " + e.getMessage());
+            throw new RuntimeException("Erro ao buscar slots: " + e.getMessage());
         }
     }
 
@@ -53,27 +54,5 @@ public class ProfessionalScheduleController {
         }
     }
     
-
-    // POST Verifica os horários disponíveis em determinada data
-    @PostMapping("/available-slots")
-    public ResponseEntity<ProfessionalScheduleDto> getAvailableSlots(@RequestBody ProfessionalScheduleDto request) {
-        try {
-            Long proId = request.getHealthProfessionalId();
-            LocalDate date = request.getDate();
-            List<Appointment> freeAppointments = scheduleService.getAvailableSlots(proId, date);
-
-            ProfessionalScheduleDto response = new ProfessionalScheduleDto();
-            response.setHealthProfessionalId(proId);
-            response.setDate(date);
-            response.setAvailableSlots(freeAppointments);
-            response.setBookedSlots(null); // Não buscamos os slots ocupados neste endpoint
-            
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            throw new RuntimeException("Erro ao buscar slots disponíveis: " + e.getMessage());
-        }
-    }
-
     
 }

@@ -14,7 +14,9 @@ import br.com.vidaplus.model.Appointment;
 import br.com.vidaplus.model.MedicalRecord;
 import br.com.vidaplus.model.Surgery;
 import br.com.vidaplus.model.User;
+import br.com.vidaplus.repository.AppointmentRepository;
 import br.com.vidaplus.repository.MedicalRecordRepository;
+import br.com.vidaplus.repository.SurgeryRepository;
 
 @Service
 @Transactional
@@ -22,12 +24,22 @@ public class MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
     private final UserService userService;
+    private final SurgeryRepository surgeryRepository;
+    private final AppointmentRepository appointmentRepository; 
+    private final HospitalizationService hospitalizationService; 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Autowired
-    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository, UserService userService) {
+    public MedicalRecordService(MedicalRecordRepository medicalRecordRepository, 
+                                                        UserService userService,
+                                                        SurgeryRepository surgeryRepository,
+                                                        HospitalizationService hospitalizationService,
+                                                        AppointmentRepository appointmentRepository) {
         this.medicalRecordRepository = medicalRecordRepository;
         this.userService = userService;
+        this.surgeryRepository = surgeryRepository;
+        this.hospitalizationService = hospitalizationService;
+        this.appointmentRepository = appointmentRepository;
     }
 
     // Busca prontuário por paciente
@@ -300,67 +312,79 @@ public class MedicalRecordService {
     }
 
     // Remove observações de cirurgias = mesmo método de removeObservationEntries
-    @SuppressWarnings("UnnecessaryTemporaryOnConversionFromString")
-    public int removeSurgeryObservationEntries(User patient, List<Long> surgeryIds) {
+    public int removeSurgeryObservationEntries(User patient, LocalDateTime startDate, LocalDateTime endDate) {
         Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
         if (!medicalRecordOptional.isPresent()) {
             throw new RuntimeException("Prontuário não encontrado para o paciente.");
         }
-
+    
         MedicalRecord medicalRecord = medicalRecordOptional.get();
         String observations = medicalRecord.getObservations();
-
+    
         if (observations == null || observations.trim().isEmpty()) {
             return 0;
         }
-
+    
         String[] observationEntries = observations.split(" \\|\\| ");
         List<String> keptEntries = new ArrayList<>();
         int removedEntries = 0;
-
+    
         for (String entry : observationEntries) {
             String[] parts = entry.split(" \\| ", 3);
             if (parts.length < 3) {
                 continue;
             }
-
+    
             String idPart = parts[0].trim();
             if (!idPart.startsWith("Surgery-")) {
-                keptEntries.add(entry);
+                keptEntries.add(entry); // Mantém entradas que não são de cirurgias
                 continue;
             }
-
-            Long entryId;
+    
+            String dateString = parts[1].trim();
             try {
-                entryId = Long.parseLong(idPart.replace("Surgery-", ""));
-            } catch (NumberFormatException e) {
-                keptEntries.add(entry);
-                continue;
-            }
-
-            if (surgeryIds.contains(entryId)) {
-                removedEntries++;
-            } else {
-                keptEntries.add(entry);
+                LocalDateTime observationDate = LocalDateTime.parse(dateString, DATE_TIME_FORMATTER);
+                // Verifica se a data está dentro do intervalo
+                if (observationDate.isBefore(startDate) || observationDate.isAfter(endDate)) {
+                    keptEntries.add(entry); // Mantém a entrada se estiver fora do intervalo
+                } else {
+                    removedEntries++; // Conta a entrada removida
+                }
+            } catch (Exception e) {
+                keptEntries.add(entry); // Mantém a entrada se a data não puder ser parseada
             }
         }
-
+    
         medicalRecord.setObservations(String.join(" || ", keptEntries));
         medicalRecordRepository.save(medicalRecord);
-
+    
         return removedEntries;
     }
+    
 
     // Deleta prontuário
     public void deleteMedicalRecord(User patient) {
-        // Busca o prontuário do paciente
         Optional<MedicalRecord> medicalRecordOptional = medicalRecordRepository.findByPatient(patient);
-
-        // Remove o prontuário se existir
-        if (medicalRecordOptional.isPresent()) {
-            medicalRecordRepository.delete(medicalRecordOptional.get());
-        } else {
+        if (!medicalRecordOptional.isPresent()) {
             throw new RuntimeException("Prontuário não encontrado para o paciente.");
         }
+    
+        MedicalRecord medicalRecord = medicalRecordOptional.get();
+    
+        // Deleta todas as consultas associadas ao paciente
+        List<Appointment> appointments = appointmentRepository.findByPatient(patient);
+        for (Appointment appointment : appointments) {
+            appointmentRepository.delete(appointment);
+        }
+    
+        // Deleta todas as cirurgias associadas ao paciente
+        List<Surgery> surgeries = surgeryRepository.findByPatient(patient);
+        for (Surgery surgery : surgeries) {
+            hospitalizationService.deleteBySurgery(surgery);
+            surgeryRepository.delete(surgery);
+        }
+    
+        // Deleta o prontuário
+        medicalRecordRepository.delete(medicalRecord);
     }
 }
