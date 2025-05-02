@@ -38,7 +38,7 @@ public class AuditRecordService {
         }
     }
 
-    // Método sobrecarregado para registrar ação usando o usuário autenticado
+    // Para registrar ação usando o usuário autenticado
     public void logAction(String action) {
         try {
             // Obtém o usuário autenticado

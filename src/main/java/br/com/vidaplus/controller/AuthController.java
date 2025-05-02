@@ -30,7 +30,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final AuditRecordService auditRecordService;
     private final BCryptPasswordEncoder passwordEncoder;
-    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // Deve ser a mesma usada no JwtAuthenticationFilter
+    private final String SECRET_KEY = "chave-secreta-simples-para-teste-123456"; // a mesma usada no JwtAuthenticationFilter
 
     public AuthController(UserRepository userRepository, BCryptPasswordEncoder passwordEncoder, AuditRecordService auditRecordService) {
         this.userRepository = userRepository;
