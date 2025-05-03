@@ -77,6 +77,9 @@ public class SecurityConfig {
                 .requestMatchers("/auth/logout").authenticated()
                 .anyRequest().authenticated()
             )
+            
+
+
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); 
             // Garante que o token JWT será validado antes de qualquer autenticação
 
