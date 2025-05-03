@@ -48,9 +48,9 @@ Acesse http://localhost:8080 (ou porta configurada). Use o Postman ou outra plat
 
 
 Os seguintes links apresentam os testes realizados realizado para a aplicação:
-https://youtu.be/gLvQzmj5r5g
-https://youtu.be/iD2cYpGLDQs
-https://youtu.be/xapQgoiTB_U
+<br>https://youtu.be/gLvQzmj5r5g
+<br>https://youtu.be/iD2cYpGLDQs
+<br>https://youtu.be/xapQgoiTB_U
 
 
 
