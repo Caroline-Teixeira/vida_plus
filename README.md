@@ -47,6 +47,10 @@ Acesse http://localhost:8080 (ou porta configurada). Use o Postman ou outra plat
 <br>GET /api/users</h6>
 
 
+Os seguintes links apresentam os testes realizados realizado para a aplicação:
+https://youtu.be/gLvQzmj5r5g
+https://youtu.be/iD2cYpGLDQs
+https://youtu.be/xapQgoiTB_U
 
 
 
