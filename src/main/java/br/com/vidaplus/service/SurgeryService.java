@@ -308,7 +308,7 @@ public class SurgeryService {
             // Deletar a internação associada à cirurgia
             hospitalizationService.deleteBySurgery(surgery);
     
-            // Deleta a cirurgia
+            // Deleta
             surgeryRepository.deleteById(id);
         } catch (RuntimeException e) {
             throw new RuntimeException("Erro ao deletar cirurgia com ID " + id + ": " + e.getMessage());

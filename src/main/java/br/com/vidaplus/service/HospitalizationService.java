@@ -133,7 +133,7 @@ public class HospitalizationService {
         return availableBeds;
     }
 
-    // Para deletar internação associada a uma cirurgia (automático)
+    // Para deletar internação associada a uma cirurgia automaticamente
     public void deleteBySurgery(Surgery surgery) {
         Hospitalization hospitalization = hospitalizationRepository.findBySurgery(surgery);
         if (hospitalization != null) {

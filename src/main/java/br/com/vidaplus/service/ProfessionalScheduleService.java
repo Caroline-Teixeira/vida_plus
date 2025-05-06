@@ -104,7 +104,7 @@ public class ProfessionalScheduleService {
             }
         }
 
-        // Monta a resposta
+        // Se availableOnly for true, remove os slots ocupados
         ProfessionalScheduleDto response = new ProfessionalScheduleDto();
         response.setHealthProfessionalId(proId);
         response.setDate(date);
