@@ -42,15 +42,32 @@ mvn spring-boot:
 
 
 <h2>Testes de API:</h2>
-Acesse http://localhost:8080 (ou porta configurada). Use o Postman ou outra plataforma para testar endpoints Ex:
-<h6>POST /auth/login
-<br>GET /api/users</h6>
-
-
+Acesse http://localhost:8080 (ou porta configurada). Use o Postman ou outra plataforma para testar endpoints.
 Os seguintes links apresentam os testes realizados realizado para a aplicação:
 <br>https://youtu.be/gLvQzmj5r5g
 <br>https://youtu.be/iD2cYpGLDQs
 <br>https://youtu.be/xapQgoiTB_U
+
+![image](https://github.com/user-attachments/assets/6d1458c7-ac03-48e8-ba24-9e142cbf0f70)
+![image](https://github.com/user-attachments/assets/a5e8d5d7-68f7-42ef-a59f-96e68b238279)
+![image](https://github.com/user-attachments/assets/a791ff79-f912-40f4-b9d7-ae66a8a38f70)
+![image](https://github.com/user-attachments/assets/0ed69f6e-d4c6-4546-a753-b3dae10535d5)
+![image](https://github.com/user-attachments/assets/f3309682-cd98-4a6b-900c-691417444e60)
+<br>![image](https://github.com/user-attachments/assets/2a8dae27-852c-41a5-a00b-e8d6dab3bfcb)
+![image](https://github.com/user-attachments/assets/756b733e-deb6-4a44-a3e6-740f8d16c799)
+![image](https://github.com/user-attachments/assets/996c3dfe-a544-4d96-9cec-762abce6bdda)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
