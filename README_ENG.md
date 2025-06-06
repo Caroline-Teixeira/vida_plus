@@ -1,4 +1,7 @@
-# Hospital and Health Services Management System - VidaPlus
+# Hospital and Health Services Management System - VidaPlus 
+
+<a href="https://github.com/Caroline-Teixeira/vida_plus/blob/main/README.md"><img src="https://raw.githubusercontent.com/yammadev/flag-icons/refs/heads/master/png/BR%402x.png" alt="Portuguese" ></a>
+
 
 Repository for HSHMS (Hospital and Health Services Management System), a multidisciplinary project developed for the Multidisciplinary Project course at UNINTER (2025). This system was created for the fictional institution VidaPlus, with the objective of centralizing registrations, appointments, telemedicine, and hospital administration, according to the provided case study.
 
@@ -56,6 +59,18 @@ The following links present the tests performed for the application:
 - https://youtu.be/gLvQzmj5r5g
 - https://youtu.be/iD2cYpGLDQs
 - https://youtu.be/xapQgoiTB_U
+
+<h2>Automatic Token Configuration - POSTMAN</h2>
+Create an environment called ‘Hospital VidaPlus’. In the login session, use the script:
+
+```
+pm.environment.unset("hospital-token");
+console.log("Token removed from environment variable");
+```
+For other requests:
+
+In the `Header` section, create a key called `Authorization` and set the following value in `Value`: `Bearer {{hospital-token}}`.
+The Token expires after 7 days.
 
 ## Test Users
 
