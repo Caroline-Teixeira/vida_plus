@@ -21,14 +21,14 @@ Back-end: Java 17, Spring Boot, Spring MVC, Spring Data JPA, Spring Security
 ```
 git clone https://github.com/Caroline-Teixeira/vida_plus.git
 ```
-<br>
+
 
 <h5>Navegue até o diretório:</h5> 
 
 ```
 cd vida_plus
 ```
-<br>
+
 
 <h5>Configure o banco de dados (MySQL):</h5
                                          
@@ -51,7 +51,7 @@ spring.jpa.hibernate.ddl-auto=update
 mvn clean install
 mvn spring-boot:
 ```
-<br>
+
 
 
 <h2>Testes de API:</h2>
@@ -60,6 +60,17 @@ Os seguintes links apresentam os testes realizados realizado para a aplicação:
 <br>https://youtu.be/gLvQzmj5r5g
 <br>https://youtu.be/iD2cYpGLDQs
 <br>https://youtu.be/xapQgoiTB_U
+
+<h2>Configuração de Token automático - POSTMAN</h2>
+Crie um ambiente chamado ‘Hospital VidaPlus’. Na sessão de login utilize o scritp:
+
+```
+pm.environment.unset("hospital-token");
+console.log("Token removido da variável de ambiente");
+```
+Para as demais requisições: 
+Na seção `Header`, crie uma key chamada `Authorization` e coloque no `Value` o seguinte valor: `Bearer {{hospital-token}}`.
+O Token expira após 7 dias.
 
 <h2>Usuários para Testes</h2>
 
