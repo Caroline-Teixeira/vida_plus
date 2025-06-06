@@ -17,47 +17,124 @@ Back-end: Java 17, Spring Boot, Spring MVC, Spring Data JPA, Spring Security
 
 <h2>Configurações</h2>
 <h5>Clone o repositório:</h5> 
+
+```
 git clone https://github.com/Caroline-Teixeira/vida_plus.git
+```
 <br>
 
 <h5>Navegue até o diretório:</h5> 
+
+```
 cd vida_plus
+```
 <br>
 
-<h5>Configure o banco de dados (MySQL):</h5> 
+<h5>Configure o banco de dados (MySQL):</h5
+                                         
+```
 DATABASE hospital_vidaplus;
-<br>
+```
 
 <h5>Atualize o arquivo application.properties para:</h5>
+
+```
 spring.datasource.url=jdbc:mysql://localhost:3306/hospital_vidaplus
 spring.datasource.username=seu_usuario
 spring.datasource.password=sua_senha
 spring.jpa.hibernate.ddl-auto=update
-<br>
+```
 
 <h5>Compile e execute:</h5>
+
+```
 mvn clean install
 mvn spring-boot:
+```
 <br>
 
 
 <h2>Testes de API:</h2>
 Acesse http://localhost:8080 (ou porta configurada). Use o Postman ou outra plataforma para testar endpoints.
-Os seguintes links apresentam os testes realizados realizado para a aplicação:
+Os seguintes links apresentam os testes realizados realizado para a aplicação: <br>
 <br>https://youtu.be/gLvQzmj5r5g
 <br>https://youtu.be/iD2cYpGLDQs
 <br>https://youtu.be/xapQgoiTB_U
 
-![image](https://github.com/user-attachments/assets/6d1458c7-ac03-48e8-ba24-9e142cbf0f70)
-![image](https://github.com/user-attachments/assets/a5e8d5d7-68f7-42ef-a59f-96e68b238279)
-![image](https://github.com/user-attachments/assets/a791ff79-f912-40f4-b9d7-ae66a8a38f70)
-![image](https://github.com/user-attachments/assets/0ed69f6e-d4c6-4546-a753-b3dae10535d5)
-![image](https://github.com/user-attachments/assets/f3309682-cd98-4a6b-900c-691417444e60)
-<br>![image](https://github.com/user-attachments/assets/2a8dae27-852c-41a5-a00b-e8d6dab3bfcb)
-![image](https://github.com/user-attachments/assets/756b733e-deb6-4a44-a3e6-740f8d16c799)
-![image](https://github.com/user-attachments/assets/996c3dfe-a544-4d96-9cec-762abce6bdda)
+<h2>Usuários para Testes</h2>
 
+| **PAPEL** | **EMAIL** | **SENHA** |
+|-----------|-----------|-----------|
+| ADMIN | fernanda.costa@example.com | fernanda022 |
+| ADMIN | leon.s@example.com | senha123 |
+| HEALTH_PROFESSIONAL | mariana.lopes@example.com | 123mariana |
+| ATTENDANT | lucas.oliveira@example.com | lucas789 |
+| ATTENDANT | sheila.s@example.com | 123senha |
+| PATIENT | alice.costa@example.com | alice202 |
+| PATIENT | clara.s@example.com | senha123 |
 
+<h2>Documentação da API - Endpoints HTTP</h2>
+
+## Método HTTP: POST
+
+| URL | DESCRIÇÃO | PERMISSÕES |
+|-----|-----------|------------|
+| /auth/login | Permite acesso público a rotas de autenticação (ex.: login) | Todos (Sem Autenticação) |
+| /auth/logout | Realiza o logout do usuário autenticado | Usuários Autenticados |
+| /api/audit-records/filter | Filtra registros de auditoria (por usuários) | Admin |
+| /api/users | Cria um novo usuário | Admin, Attendant |
+| /api/appointments | Cria um novo agendamento | Admin, Attendant |
+| /api/surgeries | Cria um novo registro de cirurgia | Admin, Attendant |
+| /api/medical-records/{patientId}/add-observations | Adiciona observações de uma consulta ao prontuário | Admin, Health_Professional |
+| /api/medical-records/{patientId}/add-surgery-observations | Adiciona observações de uma cirurgia ao prontuário | Admin, Health_Professional |
+
+## Método HTTP: PUT
+
+| URL | DESCRIÇÃO | PERMISSÕES |
+|-----|-----------|------------|
+| /api/users/{id} | Atualiza um usuário específico | Admin, Attendant |
+| /api/appointments/{id} | Atualiza um agendamento específico | Admin, Attendant |
+| /api/appointments/{id}/status | Atualiza o status de um agendamento | Admin, Attendant |
+| /api/surgeries/{id} | Atualiza uma cirurgia específica | Admin, Attendant |
+| /api/surgeries/{id}/status | Atualiza o status de uma cirurgia | Admin, Attendant |
+| /api/medical-records/{patientId}/update-observations | Atualiza observações de uma consulta de um prontuário | Admin, Health_Professional |
+| /api/medical-records/{patientId}/update-surgery-observations | Atualiza observações de uma cirurgia de um prontuário | Admin, Health_Professional |
+
+## Método HTTP: GET
+
+| URL | DESCRIÇÃO | PERMISSÕES |
+|-----|-----------|------------|
+| /api/users | Lista todos os usuários | Admin, Attendant |
+| /api/users/{id} | Obtém detalhes de um usuário específico | Admin, Attendant |
+| /api/users/current | Obtém dados do usuário autenticado | Todos (Usuário autenticado) |
+| /api/appointments | Lista todos os agendamentos | Admin, Attendant |
+| /api/appointments/{id} | Obtém detalhes de um agendamento específico | Admin, Attendant, Health_Professional |
+| /api/appointments/current | Lista os agendamentos atuais do usuário | Todos (Usuário autenticado) |
+| /api/appointments/patient/{patientId} | Lista agendamentos de um paciente específico | Admin, Attendant, Health_Professional |
+| /api/appointments/healthProfessional/{healthProfessionalId} | Lista agendamentos de um profissional de saúde | Admin, Attendant, Health_Professional |
+| /api/surgeries | Lista todas as cirurgias | Admin, Attendant |
+| /api/surgeries/{id} | Obtém detalhes de uma cirurgia específica | Admin, Attendant, Health_Professional |
+| /api/surgeries/current | Lista as cirurgias atuais do usuário | Todos (Usuário autenticado) |
+| /api/surgeries/patient/{patientId} | Lista cirurgias de um paciente específico | Admin, Attendant, Health_Professional |
+| /api/surgeries/healthProfessional/{healthProfessionalId} | Lista cirurgias de um profissional de saúde | Admin, Attendant, Health_Professional |
+| /api/medical-records/current | Lista o prontuário do usuário atual | Todos (Usuário autenticado) |
+| /api/medical-records/patient/{patientId} | Lista o prontuário de um paciente específico | Admin, Attendant, Health_Professional |
+| /api/audit-records/all | Lista todos os registros de auditoria | Admin |
+| /api/schedule/all-slots/{professionalId}/{date} | Lista todos os slots disponíveis de um profissional | Admin, attendant |
+| /api/schedule/current/{date} | Obtém a agenda atual de uma data específica | Admin, attendant, health_professional |
+| /api/hospitalizations/active | Lista internações ativas | Admin |
+| /api/hospitalizations/available-beds | Lista leitos disponíveis | Admin |
+
+## Método HTTP: DELETE
+
+| URL | DESCRIÇÃO | PERMISSÕES |
+|-----|-----------|------------|
+| /api/users/{id} | Remove um usuário específico | Admin |
+| /api/appointments/{id} | Remove um agendamento específico | Admin, Attendant |
+| /api/surgeries/{id} | Remove uma cirurgia específica | Admin, Attendant |
+| /api/medical-records/{patientId}/remove-observations | Remove observações de uma consulta no prontuário | Admin, Health_Professional |
+| /api/medical-records/{patientId}/remove-surgery-observations | Remove observações de cirurgia no prontuário | Admin, Health_Professional |
+| /api/medical-records/{patientId} | Remove um prontuário específico | Admin |
 
 
 
